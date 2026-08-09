@@ -92,6 +92,10 @@ const ParticleText = ({
     let width = 0;
     let height = 0;
     let dpr = 1;
+    // Cache scroll position — reading window.scrollY inside rAF causes layout thrash
+    let cachedScrollY = window.scrollY;
+    const handleScroll = () => { cachedScrollY = window.scrollY; };
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     const pointer = {
       active: false,
@@ -140,18 +144,14 @@ const ParticleText = ({
 
     const render = now => {
       ctx.clearRect(0, 0, width, height);
-
-      if (glow && !reducedMotion) {
-        ctx.shadowBlur = particleSize * 3;
-        ctx.shadowColor = highlightColor;
-      } else {
-        ctx.shadowBlur = 0;
-      }
+      // shadowBlur is set via CSS filter on the canvas element for GPU path
+      // Setting it per-frame here forces a software render path — removed.
 
       pointer.smoothX += (pointer.x - pointer.smoothX) * 0.18;
       pointer.smoothY += (pointer.y - pointer.smoothY) * 0.18;
 
       let complete = true;
+      let anyActive = gathering || pointer.active;
 
       particles.forEach(particle => {
         let baseX = particle.targetX;
@@ -169,13 +169,13 @@ const ParticleText = ({
           const driftTime = now * 0.001;
           baseX += Math.sin(driftTime * 0.9 + particle.seed * 10) * idleDrift * particle.depth;
           baseY += Math.cos(driftTime * 0.75 + particle.depth * 10) * idleDrift * particle.depth;
+          anyActive = true;
         }
 
-        // Scrolling effect: displace particles based on scroll Y offset
-        const currentScroll = typeof window !== 'undefined' ? window.scrollY : 0;
-        if (currentScroll > 0) {
+        // Use cached scroll Y — reading window.scrollY inside rAF thrashes layout
+        if (cachedScrollY > 0) {
           const maxDisplacement = 130;
-          const scrollFactor = Math.min(currentScroll * 0.4, maxDisplacement);
+          const scrollFactor = Math.min(cachedScrollY * 0.4, maxDisplacement);
           baseX += Math.sin(particle.seed * 24) * scrollFactor * 0.3 * particle.depth;
           baseY += Math.cos(particle.seed * 24) * scrollFactor * 0.25 * particle.depth;
         }
@@ -183,11 +183,11 @@ const ParticleText = ({
         if (pointer.active && !reducedMotion && pointerRepel > 0 && repelRadius > 0) {
           const dx = baseX - pointer.smoothX;
           const dy = baseY - pointer.smoothY;
-          const distance = Math.hypot(dx, dy);
-          if (distance > 0 && distance < repelRadius) {
-            const force = Math.pow(1 - distance / repelRadius, 2) * pointerRepel;
-            baseX += (dx / distance) * force;
-            baseY += (dy / distance) * force;
+          const dist = Math.hypot(dx, dy);
+          if (dist > 0 && dist < repelRadius) {
+            const force = Math.pow(1 - dist / repelRadius, 2) * pointerRepel;
+            baseX += (dx / dist) * force;
+            baseY += (dy / dist) * force;
           }
         }
 
@@ -200,13 +200,17 @@ const ParticleText = ({
       });
 
       ctx.globalAlpha = 1;
-      ctx.shadowBlur = 0;
 
       if (gathering && complete) {
         gathering = false;
       }
 
-      animationFrame = window.requestAnimationFrame(render);
+      // Self-terminate when nothing is moving — prevents idle CPU burn
+      if (anyActive) {
+        animationFrame = window.requestAnimationFrame(render);
+      } else {
+        animationFrame = null;
+      }
     };
 
     const ensureRenderLoop = () => {
@@ -390,6 +394,7 @@ const ParticleText = ({
     return () => {
       buildId += 1;
       resizeObserver.disconnect();
+      window.removeEventListener('scroll', handleScroll);
       reduceMotionQuery?.removeEventListener('change', handleReduceMotionChange);
       canvas.removeEventListener('pointerenter', handlePointerEnter);
       canvas.removeEventListener('pointermove', handlePointerMove);

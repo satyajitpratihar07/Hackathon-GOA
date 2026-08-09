@@ -5,6 +5,18 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;700;900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Pirata+One&display=swap');
 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* Enables native momentum scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
+  /* Prevents bounce/overscroll effects that can cause jank */
+  overscroll-behavior: none;
+  scroll-behavior: auto; /* Let JS control scroll, not CSS (avoids conflicts) */
+}
+
 /* ═══════════════════════════════════════════════════════
    INTRO SCREEN — Particle splash on first page load
 ═══════════════════════════════════════════════════════ */
@@ -335,6 +347,10 @@ body {
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
+  /* Force dedicated GPU compositor layer so video never touches main UI layer */
+  transform: translateZ(0);
+  will-change: transform;
+  contain: strict;
 }
 
 .hhg-bg-gradient {
@@ -2461,6 +2477,9 @@ body {
 
 .hhg-cyber-bg-container {
   isolation: isolate;
+  /* Ensure video is on its own compositor layer */
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -2885,3 +2904,9 @@ body {
   }
 }@media (max-width: 768px) { .hhg-hide-on-mobile { display: none !important; } }
 @media (max-width: 768px) { .hhg-hero-title-main { font-size: 26vw !important; line-height: 0.8 !important; } }
+@media (min-width: 769px) { .hhg-mobile-only { display: none !important; } }
+@media (max-width: 768px) {
+  .hhg-cyber-bg-container g {
+    animation: none !important;
+  }
+}

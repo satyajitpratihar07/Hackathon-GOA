@@ -44,8 +44,11 @@ const EchoText = ({
   const frameRef = useRef(null);
   const stateRef = useRef(null);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
-  const echoCount = prefersReducedMotion ? 0 : clamp(Math.round(echoes), 0, 24);
+  const finalEchoes = isMobile ? 3 : echoes;
+  const finalBlur = isMobile ? 0 : blur;
+  const echoCount = prefersReducedMotion ? 0 : clamp(Math.round(finalEchoes), 0, 24);
   const copyIndexes = useMemo(() => Array.from({ length: echoCount + 1 }, (_, index) => index), [echoCount]);
 
   useEffect(() => {
@@ -54,9 +57,17 @@ const EchoText = ({
     const media = window.matchMedia('(prefers-reduced-motion: reduce)');
     const updateMotionPreference = () => setPrefersReducedMotion(media.matches);
     updateMotionPreference();
-
     media.addEventListener?.('change', updateMotionPreference);
-    return () => media.removeEventListener?.('change', updateMotionPreference);
+
+    const mobileMedia = window.matchMedia('(max-width: 768px)');
+    const updateMobilePreference = () => setIsMobile(mobileMedia.matches);
+    updateMobilePreference();
+    mobileMedia.addEventListener?.('change', updateMobilePreference);
+
+    return () => {
+      media.removeEventListener?.('change', updateMotionPreference);
+      mobileMedia.removeEventListener?.('change', updateMobilePreference);
+    };
   }, []);
 
   useEffect(() => {
@@ -68,7 +79,7 @@ const EchoText = ({
     const safeCursorRadius = clamp(Number(cursorRadius) || 320, 40, 1200);
     const safeLag = clamp(Number(lag) || 0.16, 0.02, 0.5);
     const safeFade = clamp(Number(fade) || 0.64, 0.1, 0.95);
-    const safeBlur = clamp(Number(blur) || 0, 0, 16);
+    const safeBlur = clamp(Number(finalBlur) || 0, 0, 16);
     const safeDuration = Math.max(0, Number(duration) || 0);
     const easeFn = easing[ease] || easing['ease-out'];
     const entranceEnabled = mode === 'entrance' || mode === 'both';
@@ -185,12 +196,13 @@ const EchoText = ({
         copy.style.opacity = String(Math.pow(safeFade, index) * state.activity);
       }
 
+      // Remove canHover from this check — on mobile canHover=false but having it
+      // here caused the rAF loop to run forever even when nothing was animating.
       const stillMoving =
         state.activity > 0.002 ||
         Math.abs(state.targetX) > 0.01 ||
         Math.abs(state.targetY) > 0.01 ||
-        entranceProgress < 1 ||
-        canHover;
+        entranceProgress < 1;
 
       if (stillMoving) {
         frameRef.current = requestAnimationFrame(renderFrame);
@@ -207,7 +219,7 @@ const EchoText = ({
       frameRef.current = null;
       stateRef.current = null;
     };
-  }, [blur, cursorRadius, direction, duration, ease, echoCount, fade, lag, mode, offset, prefersReducedMotion]);
+  }, [finalBlur, cursorRadius, direction, duration, ease, echoCount, fade, lag, mode, offset, prefersReducedMotion, isMobile]);
 
   const rootStyle = {
     fontSize,

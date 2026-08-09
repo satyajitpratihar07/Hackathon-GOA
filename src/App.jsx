@@ -349,7 +349,7 @@ export default function App() {
               className="hhg-hero-title-main"
               containerRef={titleContainerRef}
             />
-            <div style={{
+            <div className="hhg-mobile-only" style={{
               marginTop: '1.5rem',
               color: '#000000',
               fontWeight: 900,
