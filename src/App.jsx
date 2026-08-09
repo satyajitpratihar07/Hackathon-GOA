@@ -413,6 +413,8 @@ export default function App() {
                 justifyContent: 'center',
                 alignItems: 'center',
                 overflow: 'hidden',
+                perspective: '2000px',
+                transformStyle: 'preserve-3d',
               }}
             >
               {/* Blur backdrop animation */}
@@ -445,7 +447,6 @@ export default function App() {
                   justifyContent: 'center',
                   alignItems: 'center',
                   transformStyle: 'preserve-3d',
-                  perspective: '2000px',
                 }}
               >
                 <InteractiveBook step={step} onOpen={() => setStep(1)} onClose={() => { setStep(0); setBookVisible(false); }}>

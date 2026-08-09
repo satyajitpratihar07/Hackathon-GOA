@@ -188,8 +188,26 @@
 .hhg-book-front-cover .cover-front {
   background: url('/hacker_house_cover.png') center/cover no-repeat !important;
   border: none !important;
-  box-shadow: inset 10px 0 50px rgba(0,0,0,0.9), 5px 10px 25px rgba(0,0,0,0.5) !important;
+  box-shadow: inset 12px 0 50px rgba(0,0,0,0.85), 
+              0 15px 35px rgba(0,0,0,0.65), 
+              0 5px 15px rgba(0,0,0,0.4) !important;
   padding: 0;
+  image-rendering: -webkit-optimize-contrast;
+  position: relative;
+}
+
+/* Premium 8K Glossy reflection highlight overlay */
+.hhg-book-front-cover .cover-front::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.18) 0%, 
+    rgba(255, 255, 255, 0.08) 25%, 
+    rgba(255, 255, 255, 0) 50%, 
+    rgba(0, 0, 0, 0.15) 100%);
+  pointer-events: none;
+  z-index: 5;
 }
 
 .cover-click-hint {

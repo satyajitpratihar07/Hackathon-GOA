@@ -80,7 +80,11 @@ export default function InteractiveBook({ step, children, onOpen, onClose }) {
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
-  const handleCoverClick = () => {
+  const handleCoverClick = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (!isOpen) {
       setIsOpen(true);
       if (onOpen) onOpen();
@@ -207,7 +211,8 @@ export default function InteractiveBook({ step, children, onOpen, onClose }) {
           className="hhg-book-page hhg-book-front-cover"
           style={{ 
             zIndex: isOpen ? 5 : 50, 
-            transform: isOpen ? `rotateY(-180deg) translateZ(${pages.length * 4 + 4}px)` : `rotateY(0deg) translateZ(${pages.length * 4 + 4}px)`
+            transform: isOpen ? `rotateY(-180deg) translateZ(${pages.length * 4 + 4}px)` : `rotateY(0deg) translateZ(${pages.length * 4 + 4}px)`,
+            cursor: 'pointer'
           }}
           onClick={handleCoverClick}
         >
