@@ -413,8 +413,6 @@ export default function App() {
                 justifyContent: 'center',
                 alignItems: 'center',
                 overflow: 'hidden',
-                perspective: '2000px',
-                transformStyle: 'preserve-3d',
               }}
             >
               {/* Blur backdrop animation */}
@@ -431,9 +429,9 @@ export default function App() {
               />
 
               <motion.div
-                initial={{ opacity: 0, scale: 0.68, rotateX: 15, rotateY: -15, y: 70 }}
-                animate={{ opacity: 1, scale: 1, rotateX: 0, rotateY: 0, y: 0 }}
-                exit={{ opacity: 0, scale: 0.78, rotateX: -12, rotateY: 12, y: 50 }}
+                initial={{ opacity: 0, scale: 0.75, y: 60 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.82, y: 40 }}
                 transition={{
                   type: 'spring',
                   damping: 25,
@@ -446,7 +444,6 @@ export default function App() {
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
-                  transformStyle: 'preserve-3d',
                 }}
               >
                 <InteractiveBook step={step} onOpen={() => setStep(1)} onClose={() => { setStep(0); setBookVisible(false); }}>
