@@ -717,6 +717,7 @@
   border: none !important;
   box-shadow: none !important;
   padding: 0 !important;
+  backdrop-filter: none !important;
 }
 /* Builder Details Header (override inline style) */
 .hhg-book-page-content .glass-card > div:first-child {
