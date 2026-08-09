@@ -1,0 +1,306 @@
+﻿
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Custom Neon Poster ID Card Renderer
+// Builds entire poster from scratch â€” same as reference image
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+async function drawNeonPosterIDCard(canvas, imageSrc, userData, cropData, qrUrl) {
+  const ctx = canvas.getContext('2d');
+  const W = 1080;
+  const H = 1540;
+  canvas.width = W;
+  canvas.height = H;
+
+  const glow = (color, blur = 20) => { ctx.shadowColor = color; ctx.shadowBlur = blur; };
+  const resetGlow = () => { ctx.shadowBlur = 0; ctx.shadowColor = 'transparent'; };
+  const rr = (x, y, w, h, r) => {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  };
+
+  // 1. BACKGROUND
+  const bg = ctx.createRadialGradient(W / 2, H * 0.35, 0, W / 2, H * 0.5, H * 0.8);
+  bg.addColorStop(0, '#0D1B3E');
+  bg.addColorStop(0.5, '#050C1F');
+  bg.addColorStop(1, '#020812');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // Stars (deterministic, no Math.random)
+  for (let i = 0; i < 180; i++) {
+    const sx = (i * 137 + 42) % W;
+    const sy = (i * 97 + 42) % Math.round(H * 0.7);
+    const sr = (i % 3 === 0) ? 1.5 : 0.8;
+    ctx.fillStyle = `rgba(255,255,255,${0.4 + (i % 5) * 0.1})`;
+    ctx.beginPath(); ctx.arc(sx, sy, sr, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // Teal glow pool
+  const pool = ctx.createRadialGradient(W / 2, 660, 0, W / 2, 660, 500);
+  pool.addColorStop(0, 'rgba(0,180,200,0.18)');
+  pool.addColorStop(1, 'transparent');
+  ctx.fillStyle = pool;
+  ctx.fillRect(0, 0, W, H);
+
+  // 2. OUTER BORDER
+  ctx.save();
+  glow('#00F0FF', 12);
+  ctx.strokeStyle = '#00F0FF'; ctx.lineWidth = 3;
+  rr(16, 16, W - 32, H - 32, 24); ctx.stroke();
+  resetGlow();
+  const bk = (x, y, fx, fy) => {
+    ctx.beginPath();
+    ctx.moveTo(x + fx * 50, y); ctx.lineTo(x, y); ctx.lineTo(x, y + fy * 50);
+    ctx.stroke();
+  };
+  ctx.lineWidth = 4; glow('#00F0FF', 14);
+  bk(20,20,1,1); bk(W-20,20,-1,1); bk(20,H-20,1,-1); bk(W-20,H-20,-1,-1);
+  resetGlow();
+  ctx.restore();
+
+  // 3. TOP: GOA INDIA stamp (top-left)
+  ctx.save();
+  ctx.strokeStyle = '#4A8F6A'; ctx.lineWidth = 4;
+  rr(40,40,150,110,8); ctx.stroke();
+  ctx.fillStyle = '#122A1A'; rr(40,40,150,110,8); ctx.fill();
+  const sunStamp = ctx.createLinearGradient(50,50,50,120);
+  sunStamp.addColorStop(0,'#1A6B3A'); sunStamp.addColorStop(0.5,'#FF7B54'); sunStamp.addColorStop(1,'#E8C840');
+  ctx.fillStyle = sunStamp; ctx.fillRect(50,50,132,76);
+  ctx.fillStyle='rgba(0,0,0,0.45)'; ctx.fillRect(99,58,4,44);
+  ctx.beginPath(); ctx.arc(101,68,16,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#FFFFFF'; ctx.font='bold 13px "Unbounded",sans-serif'; ctx.textAlign='center';
+  ctx.fillText('GOA',115,140); ctx.font='bold 10px "Space Mono",monospace';
+  ctx.fillStyle='rgba(255,255,255,0.7)'; ctx.fillText('INDIA',115,154);
+  ctx.restore();
+
+  // TOP: HH GOA 2026 badge (center)
+  ctx.save();
+  ctx.fillStyle='#C4006A'; rr(W/2-64,22,128,110,12); ctx.fill();
+  glow('#FF1B8D',20); ctx.strokeStyle='#FF1B8D'; ctx.lineWidth=3;
+  rr(W/2-64,22,128,110,12); ctx.stroke(); resetGlow();
+  ctx.font='22px serif'; ctx.textAlign='center'; ctx.fillStyle='#E8C840'; ctx.fillText('ðŸŒ´',W/2,60);
+  ctx.fillStyle='#FFFFFF'; ctx.font='bold 22px "Unbounded",sans-serif'; ctx.fillText('HH',W/2,85);
+  ctx.font='bold 18px "Unbounded",sans-serif'; ctx.fillStyle='#E8C840'; ctx.fillText('GOA',W/2,107);
+  ctx.font='bold 14px "Unbounded",sans-serif'; ctx.fillStyle='#FFFFFF'; ctx.fillText('2026',W/2,127);
+  ctx.restore();
+
+  // TOP: circular stamp (top-right)
+  ctx.save();
+  glow('#00F0FF',8); ctx.strokeStyle='#4A8F6A'; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.arc(W-100,100,70,0,Math.PI*2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(W-100,100,58,0,Math.PI*2); ctx.stroke();
+  resetGlow();
+  ctx.fillStyle='#1A6B3A'; ctx.font='22px serif'; ctx.textAlign='center'; ctx.fillText('ðŸŒ´',W-100,108);
+  ctx.fillStyle='rgba(255,255,255,0.85)'; ctx.font='700 9px "Space Mono",monospace';
+  const circ='BUILD IN GOA Â· SHIP FROM PARADISE Â· '.split('');
+  circ.forEach((ch,i)=>{
+    const a=(i/circ.length)*Math.PI*2-Math.PI/2;
+    ctx.save(); ctx.translate(W-100+Math.cos(a)*64,100+Math.sin(a)*64); ctx.rotate(a+Math.PI/2);
+    ctx.fillText(ch,0,0); ctx.restore();
+  });
+  ctx.restore();
+
+  // 4. TITLE
+  ctx.save(); ctx.textAlign='center'; ctx.textBaseline='alphabetic';
+  ctx.fillStyle='#FFFFFF'; ctx.font='900 70px "Unbounded",sans-serif';
+  glow('#FFFFFF',8); ctx.fillText('HACKER',W/2-168,218); resetGlow();
+  ctx.fillStyle='#FF1B8D'; ctx.font='900 68px serif';
+  glow('#FF1B8D',20); ctx.fillText('à¤—à¥‹à¤µà¤¾',W/2+8,218); resetGlow();
+  ctx.fillStyle='#FFFFFF'; ctx.font='900 70px "Unbounded",sans-serif';
+  glow('#FFFFFF',8); ctx.fillText('HOUSE',W/2+210,218); resetGlow();
+  ctx.restore();
+
+  ctx.save(); ctx.textAlign='center';
+  ctx.fillStyle='rgba(180,210,255,0.6)'; ctx.font='500 17px "Space Mono",monospace';
+  ctx.fillText('CODE.  COLLABORATE.  CREATE HISTORY.',W/2,248); ctx.restore();
+
+  // 5. LEFT SIDEBAR dates
+  ctx.save();
+  ctx.translate(38,490); ctx.rotate(-Math.PI/2);
+  ctx.textAlign='center'; ctx.fillStyle='#FF1B8D'; ctx.font='900 20px "Unbounded",sans-serif';
+  glow('#FF1B8D',10); ctx.fillText('28 â€“ 31  OCT  2026',0,0); resetGlow();
+  ctx.restore();
+  ctx.save(); ctx.translate(38,700); ctx.rotate(-Math.PI/2);
+  ctx.textAlign='center'; ctx.fillStyle='rgba(255,255,255,0.45)'; ctx.font='600 14px "Space Mono",monospace';
+  ctx.fillText('GOA  Â·  INDIA',0,0); ctx.restore();
+
+  // Signs: BUILD / SHIP / REPEAT
+  ctx.save();
+  [{label:'âš“ BUILD',color:'#E8C840',y:760},{label:'ðŸš¢ SHIP',color:'#FF1B8D',y:824},{label:'ðŸ” REPEAT',color:'#00F0FF',y:888}]
+  .forEach(s=>{
+    ctx.fillStyle=s.color+'22'; rr(42,s.y,160,44,8); ctx.fill();
+    glow(s.color,10); ctx.strokeStyle=s.color; ctx.lineWidth=2; rr(42,s.y,160,44,8); ctx.stroke(); resetGlow();
+    ctx.fillStyle='#FFFFFF'; ctx.font='bold 17px "Unbounded",sans-serif'; ctx.textAlign='center';
+    ctx.fillText(s.label,122,s.y+28);
+  });
+  ctx.restore();
+
+  // 6. LET'S BUILD badge (right)
+  ctx.save();
+  ctx.fillStyle='#E8C840'; rr(W-210,460,168,94,14); ctx.fill();
+  ctx.fillStyle='#000000'; ctx.font='bold 28px "Unbounded",sans-serif'; ctx.textAlign='center';
+  ctx.fillText("LET'S",W-126,510); ctx.fillText('BUILD!',W-126,544);
+  ctx.restore();
+
+  // 7. CENTER PHOTO CIRCLE
+  const cx = W/2, cy = 650, photoR = 306;
+
+  // Outer glow rings
+  ctx.save();
+  for(let i=3;i>=1;i--){
+    ctx.strokeStyle=`rgba(0,240,255,${0.07*i})`; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.arc(cx,cy,photoR+28+i*18,0,Math.PI*2); ctx.stroke();
+  }
+  ctx.restore();
+
+  // Photo
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx,cy,photoR,0,Math.PI*2); ctx.clip();
+  const img = await loadImage(imageSrc);
+  if(cropData) drawCroppedImage(ctx,img,cropData,cx-photoR,cy-photoR,photoR*2,photoR*2);
+  else drawCoveredImage(ctx,img,cx-photoR,cy-photoR,photoR*2,photoR*2);
+  ctx.restore();
+
+  // Ring borders
+  ctx.save();
+  ctx.lineWidth=16; ctx.strokeStyle='#FF1B8D'; glow('#FF1B8D',30);
+  ctx.beginPath(); ctx.arc(cx,cy,photoR+8,0,Math.PI*2); ctx.stroke();
+  ctx.lineWidth=8; ctx.strokeStyle='#00F0FF'; glow('#00F0FF',22);
+  ctx.beginPath(); ctx.arc(cx,cy,photoR+22,0,Math.PI*2); ctx.stroke();
+  resetGlow(); ctx.restore();
+
+  ctx.save(); ctx.fillStyle='rgba(200,220,255,0.65)'; ctx.font='600 15px "Space Mono",monospace';
+  ctx.textAlign='center'; ctx.fillText('BUILD  Â·  INNOVATE  Â·  IMPACT',cx,cy-photoR-32); ctx.restore();
+
+  // 8. NAME BAR
+  const nameBarY = cy+photoR+28;
+  ctx.save();
+  glow('#00F0FF',8); ctx.strokeStyle='#00F0FF'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(cx-340,nameBarY+35); ctx.lineTo(cx-240,nameBarY+35); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx+240,nameBarY+35); ctx.lineTo(cx+340,nameBarY+35); ctx.stroke();
+  ctx.fillStyle='#00F0FF';
+  [-210,-192,-175].forEach(ox=>{ ctx.beginPath(); ctx.arc(cx+ox,nameBarY+35,4,0,Math.PI*2); ctx.fill(); });
+  [175,192,210].forEach(ox=>{ ctx.beginPath(); ctx.arc(cx+ox,nameBarY+35,4,0,Math.PI*2); ctx.fill(); });
+  resetGlow(); ctx.restore();
+
+  ctx.save();
+  ctx.fillStyle='rgba(8,16,40,0.92)'; rr(cx-340,nameBarY,680,70,10); ctx.fill();
+  glow('#00F0FF',14); ctx.strokeStyle='#00F0FF'; ctx.lineWidth=2;
+  rr(cx-340,nameBarY,680,70,10); ctx.stroke(); resetGlow();
+  ctx.fillStyle='#FFFFFF'; ctx.font='900 38px "Unbounded",sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText((userData.name||'BUILDER').toUpperCase(),cx,nameBarY+35);
+  ctx.restore();
+
+  // Handle pill (yellow)
+  const handleBarY = nameBarY+88;
+  ctx.save();
+  ctx.fillStyle='#E8C840'; rr(cx-240,handleBarY,480,56,28); ctx.fill();
+  ctx.fillStyle='#C4006A'; ctx.font='bold 20px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('âš¡',cx-175,handleBarY+28); ctx.fillText('âš¡',cx+175,handleBarY+28);
+  ctx.fillStyle='#0A0A0A'; ctx.font='900 24px "Unbounded",sans-serif';
+  const initials=(userData.name||'HH').split(' ').map(n=>n[0]||'').join('').substring(0,3).toUpperCase();
+  ctx.fillText(initials,cx,handleBarY+28);
+  ctx.restore();
+
+  // 9. BOTTOM 3 COLUMNS
+  const bottomY = handleBarY+80;
+  const colW = W/3;
+
+  // Column dividers
+  ctx.save();
+  ctx.strokeStyle='rgba(0,240,255,0.25)'; ctx.lineWidth=1; ctx.setLineDash([6,5]);
+  [colW,colW*2].forEach(x=>{ ctx.beginPath(); ctx.moveTo(x,bottomY); ctx.lineTo(x,H-80); ctx.stroke(); });
+  ctx.setLineDash([]);
+  ctx.restore();
+
+  // LEFT: BUILDER CLASS
+  ctx.save(); ctx.textAlign='center';
+  ctx.fillStyle='rgba(180,210,255,0.75)'; ctx.font='700 14px "Space Mono",monospace';
+  ctx.fillText('â€” BUILDER CLASS  >>',colW/2,bottomY+24);
+  ctx.fillStyle='#FF1B8D'; glow('#FF1B8D',14); ctx.font='900 21px "Unbounded",sans-serif';
+  const bClass=generateBuilderTitle(userData.name||'',userData.stack||'').toUpperCase().split(' ');
+  ctx.fillText(bClass[0]||'TERMINAL',colW/2,bottomY+56);
+  ctx.fillText(bClass[1]||'WIZARD',colW/2,bottomY+82); resetGlow();
+  ctx.restore();
+
+  const qrSize=155, qrX=Math.round(colW/2-qrSize/2), qrY=bottomY+100;
+  ctx.save(); ctx.fillStyle='#FFFFFF'; rr(qrX-6,qrY-6,qrSize+12,qrSize+12,8); ctx.fill(); ctx.restore();
+  await drawRealQRCode(ctx,qrX,qrY,qrSize,qrUrl||'https://hhgoa.com');
+  ctx.save(); ctx.font='16px serif'; ctx.textAlign='center'; ctx.fillText('ðŸŒ´',qrX+qrSize/2,qrY+qrSize-18); ctx.restore();
+
+  // CENTER: BEACH BAG
+  ctx.save(); ctx.textAlign='center';
+  ctx.fillStyle='rgba(180,210,255,0.75)'; ctx.font='700 14px "Space Mono",monospace';
+  ctx.fillText('â€” BEACH BAG  >>',colW*1.5,bottomY+24);
+  const bagX=colW+28;
+  [{icon:'ðŸ¥¥',label:'COCONUT'},{code:true,label:'VS CODE'},{icon:'ðŸŽ§',label:'LO-FI BEATS'}]
+  .forEach((item,i)=>{
+    const iy=bottomY+62+i*58;
+    if(item.code){
+      ctx.fillStyle='#1A3A2A'; rr(bagX,iy-18,34,34,6); ctx.fill();
+      glow('#00FF88',6); ctx.strokeStyle='#00FF88'; ctx.lineWidth=1.5; rr(bagX,iy-18,34,34,6); ctx.stroke(); resetGlow();
+      ctx.fillStyle='#00FF88'; ctx.font='bold 12px "Space Mono",monospace'; ctx.textAlign='center';
+      ctx.fillText('</>',bagX+17,iy+3);
+    } else {
+      ctx.font='26px serif'; ctx.textAlign='left'; ctx.fillText(item.icon,bagX+2,iy+6);
+    }
+    ctx.fillStyle='#FFFFFF'; ctx.font='700 17px "Unbounded",sans-serif'; ctx.textAlign='left';
+    ctx.fillText(item.label,bagX+44,iy+6);
+  });
+  ctx.restore();
+
+  // RIGHT: CURRENTLY SHIPPING
+  ctx.save(); ctx.textAlign='center';
+  ctx.fillStyle='rgba(180,210,255,0.75)'; ctx.font='700 14px "Space Mono",monospace';
+  ctx.fillText('â€” CURRENTLY SHIPPING  >>',colW*2.5,bottomY+24);
+  ctx.fillStyle='#FF1B8D'; glow('#FF1B8D',14); ctx.font='900 22px "Unbounded",sans-serif';
+  ctx.fillText('BUILDING',colW*2.5,bottomY+58); ctx.fillText('THE FUTURE',colW*2.5,bottomY+84); resetGlow();
+  ctx.strokeStyle='rgba(0,240,255,0.5)'; ctx.lineWidth=2;
+  for(let wi=0;wi<2;wi++){
+    ctx.beginPath();
+    const wy=bottomY+102+wi*12;
+    for(let wx=colW*2+24;wx<W-28;wx+=18){
+      const woff=Math.sin((wx/18)*0.9)*5;
+      if(wx===colW*2+24) ctx.moveTo(wx,wy+woff); else ctx.lineTo(wx,wy+woff);
+    }
+    ctx.stroke();
+  }
+  ctx.fillStyle='rgba(200,220,255,0.65)'; ctx.font='700 13px "Space Mono",monospace';
+  ctx.fillText('BUILDER ID',colW*2.5,bottomY+155);
+  const bId=generateBadgeId(userData.name||'',userData.stack||'');
+  ctx.fillStyle='#FFFFFF'; ctx.font='700 15px "Space Mono",monospace';
+  ctx.fillText('#HH-GOA-'+bId.replace('HHG26-',''),colW*2.5,bottomY+178);
+  ctx.fillStyle='#FFFFFF';
+  let bx2=colW*2+30, seedB=13;
+  while(bx2<W-30){ const bw=(seedB%6)+2; seedB=(seedB*7+3)%23; ctx.fillRect(bx2,bottomY+198,bw,48); bx2+=bw+(seedB%5)+2; }
+  ctx.restore();
+
+  // 10. BOTTOM SUNSET
+  ctx.save();
+  const sunY2=H-140;
+  const sg2=ctx.createLinearGradient(0,sunY2,0,H-80);
+  sg2.addColorStop(0,'rgba(255,100,20,0.15)'); sg2.addColorStop(1,'transparent');
+  ctx.fillStyle=sg2; ctx.fillRect(0,sunY2,W,H-80-sunY2);
+  ctx.fillStyle='#E8C840'; glow('#E8C840',22);
+  ctx.beginPath(); ctx.arc(cx,sunY2+22,26,0,Math.PI*2); ctx.fill(); resetGlow();
+  ctx.restore();
+
+  // 11. FOOTER
+  ctx.save();
+  ctx.fillStyle='#C4006A'; rr(cx-300,H-68,600,56,12); ctx.fill();
+  glow('#FF1B8D',22); ctx.strokeStyle='#FF1B8D'; ctx.lineWidth=3;
+  rr(cx-300,H-68,600,56,12); ctx.stroke(); resetGlow();
+  ctx.fillStyle='#FFFFFF'; ctx.font='900 26px "Unbounded",sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('âœ¦  #FRAMEINGOA  âœ¦',cx,H-40);
+  ctx.restore();
+}

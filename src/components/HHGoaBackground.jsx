@@ -8,7 +8,7 @@ const BgVideo = memo(function BgVideo() {
   useEffect(() => {
     // Single play() call to satisfy browser autoplay policy.
     // After this, native loop attribute handles seamless looping forever.
-    ref.current?.play().catch(() => {});
+    ref.current?.play().catch(() => { });
   }, []);
 
   return (
@@ -37,7 +37,35 @@ const BgVideo = memo(function BgVideo() {
   );
 });
 
-export default function HHGoaBackground({ onHouseClick, onRightHouseClick }) {
+export default function HHGoaBackground({ bgShift = 'center', dragOffset = 0, isDragging = false, onHouseClick, onRightHouseClick }) {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+  
+  // Calculate base translation in pixels based on state
+  let baseTranslate = 0;
+  if (isMobile && typeof window !== 'undefined') {
+    const H = window.innerHeight;
+    const W = window.innerWidth;
+    const Sw = H * 1.6; // SVG proportional layout width: Sw = H * (1440/900)
+    const maxTranslation = Math.max(0, (Sw - W) / 2);
+
+    if (bgShift === 'left') {
+      baseTranslate = maxTranslation;
+    } else if (bgShift === 'right') {
+      baseTranslate = -maxTranslation;
+    }
+  }
+
+  // Combine base translation and dragOffset
+  const finalTranslateX = baseTranslate + dragOffset;
+
+  const transformStyle = isMobile
+    ? `translate3d(calc(-50% + ${finalTranslateX}px), 0, 0)`
+    : 'none';
+
+  const transitionStyle = isDragging
+    ? 'none'
+    : 'transform 0.85s cubic-bezier(0.16, 1, 0.3, 1)';
+
   return (
     <div className="hhg-cyber-bg-container" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', overflow: 'hidden' }}>
 
@@ -57,9 +85,21 @@ export default function HHGoaBackground({ onHouseClick, onRightHouseClick }) {
       <svg
         className="hhg-scene-svg"
         viewBox="0 0 1440 900"
-        preserveAspectRatio="xMidYMax slice"
+        preserveAspectRatio={isMobile ? "none" : "xMidYMax slice"}
         xmlns="http://www.w3.org/2000/svg"
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 2 }}
+        style={{ 
+          position: 'absolute', 
+          top: 0,
+          bottom: 0,
+          left: isMobile ? '50%' : 0,
+          width: isMobile ? 'calc(100vh * 1.6)' : '100%', 
+          height: '100%', 
+          maxWidth: 'none',
+          zIndex: 2,
+          transform: transformStyle,
+          transition: transitionStyle,
+          transformOrigin: '50% 100%',
+        }}
       >
         {/* ── SVG z-index sits above video ── */}
         <defs>
@@ -251,22 +291,22 @@ export default function HHGoaBackground({ onHouseClick, onRightHouseClick }) {
 
         {/* Foreground Houses (Framing the scene) */}
         {/* Left House */}
-        <SeasideCottage 
-          x={-40} 
-          y={735} 
-          label="SECURITY ROOM" 
-          color="#00FF88" 
-          onClick={onHouseClick} 
+        <SeasideCottage
+          x={-40}
+          y={735}
+          label="SECURITY ROOM"
+          color="#00FF88"
+          onClick={onHouseClick}
         />
 
         {/* Right House */}
-        <SeasideCottage 
-          x={1190} 
-          y={755} 
-          label="TERMINAL" 
-          color="#FF3333" 
-          onClick={onRightHouseClick} 
-          flip={false} 
+        <SeasideCottage
+          x={1190}
+          y={755}
+          label="TERMINAL"
+          color="#FF3333"
+          onClick={onRightHouseClick}
+          flip={false}
         />
       </svg>
 
@@ -357,7 +397,7 @@ function SeasideCottage({ x, y, flip, label, color, onClick }) {
   const sX = flip ? -1 : 1;
 
   return (
-    <g 
+    <g
       transform={`translate(${x}, ${y}) scale(1.15)`}
       className="hhg-clickable-house"
       onClick={onClick}
@@ -391,7 +431,7 @@ function SeasideCottage({ x, y, flip, label, color, onClick }) {
         <line x1="20" y1="50" x2="95" y2="50" stroke="#3E2723" strokeWidth="4" />
         <line x1="20" y1="50" x2="95" y2="-40" stroke="#3E2723" strokeWidth="6" />
         <line x1="170" y1="50" x2="95" y2="-40" stroke="#3E2723" strokeWidth="6" />
-        
+
         {/* Side Timber */}
         <line x1="170" y1="210" x2="220" y2="195" stroke="#3E2723" strokeWidth="4" />
         <line x1="220" y1="60" x2="220" y2="195" stroke="#3E2723" strokeWidth="4" />
@@ -412,7 +452,7 @@ function SeasideCottage({ x, y, flip, label, color, onClick }) {
         <polygon points="165,100 230,110 245,85 175,75" fill="#D4B853" stroke="#8D6E63" strokeWidth="2" strokeLinejoin="round" />
         {/* Porch Roof Depth */}
         <polygon points="230,110 245,85 242,95 227,120" fill="#C19A44" stroke="#8D6E63" strokeWidth="1.5" />
-        
+
         {/* Porch Pillars */}
         <rect x="220" y="105" width="4" height="95" fill="#5D4037" />
         <rect x="235" y="90" width="4" height="110" fill="#3E2723" />
@@ -428,7 +468,7 @@ function SeasideCottage({ x, y, flip, label, color, onClick }) {
         <polygon points="65,115 95,115 95,135 65,165" fill="#FFE082" opacity="0.4" />
         <line x1="85" y1="115" x2="85" y2="165" stroke="#1E293B" strokeWidth="2" />
         <line x1="65" y1="140" x2="105" y2="140" stroke="#1E293B" strokeWidth="2" />
-        
+
         {/* Window Awning */}
         <polygon points="50,110 120,110 130,90 60,90" fill="#D4B853" stroke="#8D6E63" strokeWidth="2" strokeLinejoin="round" />
         {/* Awning Depth */}
@@ -437,7 +477,7 @@ function SeasideCottage({ x, y, flip, label, color, onClick }) {
         {/* Flower Box 3D */}
         <rect x="55" y="170" width="60" height="15" fill="#795548" stroke="#3E2723" strokeWidth="2" rx="2" />
         <polygon points="115,170 125,165 125,180 115,185" fill="#5D4037" stroke="#3E2723" strokeWidth="1.5" />
-        
+
         {/* Flowers */}
         <circle cx="65" cy="165" r="8" fill="#4CAF50" />
         <circle cx="85" cy="165" r="9" fill="#2E7D32" />
@@ -462,16 +502,16 @@ function SeasideCottage({ x, y, flip, label, color, onClick }) {
         {/* Main Thatched Roof Layers */}
         {/* Left Front Edge (Fascia thickness, darker) */}
         <polygon points="0,60 95,-55 95,-40 20,50" fill="#C19A44" stroke="#8D6E63" strokeWidth="2" strokeLinejoin="round" />
-        
+
         {/* Right Front Edge (Fascia thickness, darker) */}
         <polygon points="95,-55 190,60 170,50 95,-40" fill="#C19A44" stroke="#8D6E63" strokeWidth="2" strokeLinejoin="round" />
-        
+
         {/* Main Right Roof Surface (Receding) */}
         <polygon points="95,-55 190,60 240,70 145,-45" fill="#D4B853" stroke="#8D6E63" strokeWidth="2" strokeLinejoin="round" />
-        
+
         {/* Thatch edge highlights on main roof bottom edge */}
         <polygon points="190,60 240,70 235,60 185,50" fill="#E6C280" opacity="0.7" />
-        
+
         {/* Roof Thatch Texture Lines on Right Surface */}
         <path d="M 95,-55 L 190,60 M 105,-53 L 200,62 M 115,-51 L 210,64 M 125,-49 L 220,66 M 135,-47 L 230,68 M 145,-45 L 240,70" stroke="#A57A4C" strokeWidth="2" opacity="0.5" />
 
@@ -566,18 +606,18 @@ function PalmTree({ x, trunkTop, trunkBottom, lean, size }) {
         <Leaf cx={cx} cy={cy} angle={-170} len={200 * s} />
         <Leaf cx={cx} cy={cy} angle={-145} len={280 * s} />
         <Leaf cx={cx} cy={cy} angle={-115} len={240 * s} />
-        <Leaf cx={cx} cy={cy} angle={-90}  len={320 * s} />
-        <Leaf cx={cx} cy={cy} angle={-65}  len={240 * s} />
-        <Leaf cx={cx} cy={cy} angle={-35}  len={280 * s} />
-        <Leaf cx={cx} cy={cy} angle={-10}  len={200 * s} />
-        <Leaf cx={cx} cy={cy} angle={20}   len={160 * s} />
+        <Leaf cx={cx} cy={cy} angle={-90} len={320 * s} />
+        <Leaf cx={cx} cy={cy} angle={-65} len={240 * s} />
+        <Leaf cx={cx} cy={cy} angle={-35} len={280 * s} />
+        <Leaf cx={cx} cy={cy} angle={-10} len={200 * s} />
+        <Leaf cx={cx} cy={cy} angle={20} len={160 * s} />
 
         {/* Small leaves around the center near coconuts */}
         <Leaf cx={cx} cy={cy} angle={160} len={120 * s} />
         <Leaf cx={cx} cy={cy} angle={135} len={140 * s} />
         <Leaf cx={cx} cy={cy} angle={100} len={150 * s} />
-        <Leaf cx={cx} cy={cy} angle={80}  len={150 * s} />
-        <Leaf cx={cx} cy={cy} angle={45}  len={140 * s} />
+        <Leaf cx={cx} cy={cy} angle={80} len={150 * s} />
+        <Leaf cx={cx} cy={cy} angle={45} len={140 * s} />
 
         {/* Coconuts (Brown) */}
         <circle cx={cx - 15 * s} cy={cy + 15 * s} r={14 * s} fill="#5C4033" stroke="#3E2723" strokeWidth="2" />
@@ -630,7 +670,7 @@ function Leaf({ cx, cy, angle, len }) {
     const tangent = Math.atan2(dy, dx);
 
     // Leaflets taper but never go to 0 length so they form a proper tip
-    const leafletLen = len * 0.4 * (1 - t * 0.6); 
+    const leafletLen = len * 0.4 * (1 - t * 0.6);
 
     // Spread angle narrows towards the tip so they point forward like a real palm leaf
     const spread = (75 - 65 * t) * (Math.PI / 180);

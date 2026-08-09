@@ -16,24 +16,45 @@ const TAGS = [
 
 export default function IntroScreen({ onDone }) {
   const [phase, setPhase] = useState('visible'); // 'visible' | 'fading' | 'done'
+  const [isMobile, setIsMobile] = useState(false);
   const timerRef = useRef(null);
+  const onDoneRef = useRef(onDone);
+  onDoneRef.current = onDone;
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const skip = () => {
     clearTimeout(timerRef.current);
     setPhase('fading');
-    timerRef.current = setTimeout(() => { setPhase('done'); onDone?.(); }, 700);
+    timerRef.current = setTimeout(() => {
+      setPhase('done');
+      onDoneRef.current?.();
+    }, 700);
   };
 
   useEffect(() => {
-    // 4.3s display + 0.7s fade = 5s total
+    // 6.0s display + 0.7s fade = 6.7s total, then open home page
     timerRef.current = setTimeout(() => {
       setPhase('fading');
-      timerRef.current = setTimeout(() => { setPhase('done'); onDone?.(); }, 700);
-    }, 4300);
+      timerRef.current = setTimeout(() => {
+        setPhase('done');
+        onDoneRef.current?.();
+      }, 700);
+    }, 6000);
     return () => clearTimeout(timerRef.current);
-  }, [onDone]);
+  }, []);
 
   if (phase === 'done') return null;
+
+  const mDensity = isMobile ? 0.4 : 1.0; // Reduce density to fix lag on mobile
+  const mSize1 = isMobile ? 'clamp(3rem, 16vw, 6rem)' : 'clamp(2.8rem, 14vw, 6rem)';
+  const mSize2 = isMobile ? 'clamp(4rem, 20vw, 6.5rem)' : 'clamp(3.5rem, 18vw, 6.5rem)';
+  const mSize3 = isMobile ? 'clamp(4.5rem, 26vw, 8.5rem)' : 'clamp(3.8rem, 24vw, 8.5rem)';
 
   return (
     <div
@@ -51,31 +72,43 @@ export default function IntroScreen({ onDone }) {
 
       {/* Main particle title */}
       <div className="hhg-intro-content">
-        <div className="hhg-intro-row1" style={{ height: 'clamp(70px, 12vh, 140px)' }}>
-          <ParticleText
-            text="Hacker House"
-            particleSize={2.8}
-            density={1.0}
-            color="#ffffff"
-            highlightColor="#E8C840"
-            scatter={160}
-            gatherDuration={2200}
-            stagger={380}
-            pointerRepel={0}
-            repelRadius={0}
-            idleDrift={0.5}
-            trigger="mount"
-            fontSize="clamp(2.8rem, 14vw, 6rem)"
-            fontWeight={900}
-            fontFamily="'Unbounded', sans-serif"
-            glow={true}
-          />
-        </div>
+        {isMobile ? (
+          <>
+            <div className="hhg-intro-row1" style={{ height: 'clamp(50px, 10vh, 100px)' }}>
+              <ParticleText text="Hacker" particleSize={2.8} density={mDensity} color="#ffffff" highlightColor="#E8C840" scatter={160} gatherDuration={2200} stagger={380} pointerRepel={0} repelRadius={0} idleDrift={0.5} trigger="mount" fontSize={mSize1} fontWeight={900} fontFamily="'Unbounded', sans-serif" glow={true} />
+            </div>
+            <div className="hhg-intro-row1" style={{ height: 'clamp(50px, 10vh, 100px)', marginTop: '-5px' }}>
+              <ParticleText text="House" particleSize={2.8} density={mDensity} color="#ffffff" highlightColor="#E8C840" scatter={160} gatherDuration={2200} stagger={380} pointerRepel={0} repelRadius={0} idleDrift={0.5} trigger="mount" fontSize={mSize1} fontWeight={900} fontFamily="'Unbounded', sans-serif" glow={true} />
+            </div>
+          </>
+        ) : (
+          <div className="hhg-intro-row1" style={{ height: 'clamp(70px, 12vh, 140px)' }}>
+            <ParticleText
+              text="Hacker House"
+              particleSize={2.8}
+              density={mDensity}
+              color="#ffffff"
+              highlightColor="#E8C840"
+              scatter={160}
+              gatherDuration={2200}
+              stagger={380}
+              pointerRepel={0}
+              repelRadius={0}
+              idleDrift={0.5}
+              trigger="mount"
+              fontSize={mSize1}
+              fontWeight={900}
+              fontFamily="'Unbounded', sans-serif"
+              glow={true}
+            />
+          </div>
+        )}
+        
         <div className="hhg-intro-row1-half" style={{ width: '100%', height: 'clamp(65px, 11vh, 130px)', marginTop: '-10px' }}>
           <ParticleText
             text="GOA"
             particleSize={2.8}
-            density={1.0}
+            density={mDensity}
             color="#ffffff"
             highlightColor="#E8C840"
             scatter={160}
@@ -85,7 +118,7 @@ export default function IntroScreen({ onDone }) {
             repelRadius={0}
             idleDrift={0.5}
             trigger="mount"
-            fontSize="clamp(3.5rem, 18vw, 6.5rem)"
+            fontSize={mSize2}
             fontWeight={900}
             fontFamily="'Unbounded', sans-serif"
             glow={true}
@@ -95,7 +128,7 @@ export default function IntroScreen({ onDone }) {
           <ParticleText
             text="2026"
             particleSize={2.5}
-            density={1.0}
+            density={mDensity}
             color="#E8C840"
             highlightColor="#00FF88"
             scatter={180}
@@ -105,7 +138,7 @@ export default function IntroScreen({ onDone }) {
             repelRadius={0}
             idleDrift={0.6}
             trigger="mount"
-            fontSize="clamp(3.8rem, 24vw, 8.5rem)"
+            fontSize={mSize3}
             fontWeight={900}
             fontFamily="'Unbounded', sans-serif"
             glow={true}

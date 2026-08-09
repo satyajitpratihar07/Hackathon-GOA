@@ -3,26 +3,43 @@
    Colors: Deep Green + Electric Yellow + Hot Pink
    ============================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;700;900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Pirata+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;700;900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Pirata+One&family=Trade+Winds&family=New+Rocker&display=swap');
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
-html {
+html,
+body {
   /* Enables native momentum scrolling on iOS */
   -webkit-overflow-scrolling: touch;
   /* Prevents bounce/overscroll effects that can cause jank */
   overscroll-behavior: none;
   scroll-behavior: auto;
-  /* Lock html to viewport — only .hhg-app scrolls */
+  /* Lock to viewport */
   height: 100%;
-  overflow: hidden;
+  overflow: hidden !important;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none !important;
 }
 
 @keyframes bookReveal {
-  from { opacity: 0; transform: translateY(32px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -416,15 +433,20 @@ body {
 .hhg-app {
   position: relative;
   z-index: 1;
-  /* This is now the ONLY scrolling container — background stays fixed */
+  /* Fixed single screen viewport — no up/down vertical movement */
   height: 100vh;
   height: 100dvh;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden !important;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: none;
   display: flex;
   flex-direction: column;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hhg-app::-webkit-scrollbar {
+  display: none !important;
 }
 
 /* ─── HEADER ─── */
@@ -524,13 +546,15 @@ body {
 /* ─── HERO ─── */
 .hhg-hero {
   text-align: center;
-  padding: 15vh 24px 60px; /* Increased top padding to push text up, but anchored to top */
+  padding: 15vh 24px 60px;
+  /* Increased top padding to push text up, but anchored to top */
   position: relative;
   overflow: hidden;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; /* Keeps the text anchored near the top instead of center */
+  justify-content: flex-start;
+  /* Keeps the text anchored near the top instead of center */
   align-items: center;
 }
 
@@ -548,18 +572,19 @@ body {
   background: none;
   -webkit-text-fill-color: #000000;
   color: #000000;
-  -webkit-text-stroke: 1px #000000; /* Thicken the black text slightly */
+  -webkit-text-stroke: 1px #000000;
+  /* Thicken the black text slightly */
 
   /* Create the white border using text-shadow so it doesn't eat into the text thickness */
-  text-shadow: 
+  text-shadow:
     -3px -3px 0 #ffffff,
-     3px -3px 0 #ffffff,
-    -3px  3px 0 #ffffff,
-     3px  3px 0 #ffffff,
-    -4px  0   0 #ffffff,
-     4px  0   0 #ffffff,
-     0    4px 0 #ffffff,
-     0   -4px 0 #ffffff;
+    3px -3px 0 #ffffff,
+    -3px 3px 0 #ffffff,
+    3px 3px 0 #ffffff,
+    -4px 0 0 #ffffff,
+    4px 0 0 #ffffff,
+    0 4px 0 #ffffff,
+    0 -4px 0 #ffffff;
 
   /* GPU glow */
   filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.8));
@@ -605,52 +630,199 @@ body {
 
 /* ── Scroll Down Button ── */
 .hhg-scroll-btn-wrap {
-  display: flex;
-  justify-content: center;
   position: absolute;
   bottom: 80px;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
 }
 
+/* ── Cloud Speech Bubble Message ── */
+.hhg-cloud-message-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+  width: 100%;
+}
+
+.hhg-cloud-message {
+  position: relative;
+  background: rgba(255, 255, 255, 0.95);
+  color: #0F172A;
+  padding: 8px 18px;
+  border-radius: 30px;
+  font-family: 'Unbounded', 'Space Mono', sans-serif;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.35),
+    0 0 15px rgba(255, 255, 255, 0.6);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  /* Floating Cloud Animation */
+  animation: hhgFloatCloud 3s ease-in-out infinite alternate;
+}
+
+/* Cloud speech bubble tail pointer */
+.hhg-cloud-message::after {
+  content: '';
+  position: absolute;
+  bottom: -9px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 9px solid rgba(255, 255, 255, 0.95);
+}
+
+@keyframes hhgFloatCloud {
+  0% {
+    transform: translateY(0px);
+  }
+
+  100% {
+    transform: translateY(-6px);
+  }
+}
+
+/* ── Rustic Slatted Wooden Signboard Button (Stationary & Fixed) ── */
 .hhg-scroll-btn {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 32px 14px 28px;
-  font-family: 'Space Mono', monospace;
-  font-size: 12px;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 24px;
+  height: 48px;
+  white-space: nowrap;
+  font-family: 'Trade Winds', 'New Rocker', 'Pirata One', cursive, sans-serif;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   border-radius: 100px;
   cursor: pointer;
   outline: none;
-  transition: transform 0.25s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
   will-change: transform;
   transform: translateZ(0);
 
-  /* Intense Black and White Animation */
-  animation: bwPulseSmooth 3s ease-in-out infinite;
-  background: #000000;
-  color: #FFFFFF;
-  border: 2px solid #FFFFFF;
+  /* Slatted Mahogany Wood Gradient & Texture */
+  background:
+    repeating-linear-gradient(90deg, transparent 0, transparent 36px, rgba(0, 0, 0, 0.45) 36px, rgba(0, 0, 0, 0.45) 38px),
+    linear-gradient(180deg, #4A2E1D 0%, #2E1A0E 45%, #180B04 100%);
+  color: #F7EACD;
+  border: 2px solid #6E492B;
+
+  /* 3D Wood Shadow & Warm Beach Glow */
+  box-shadow:
+    inset 0 1px 3px rgba(255, 235, 205, 0.3),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.9),
+    0 8px 20px rgba(0, 0, 0, 0.8),
+    0 0 12px rgba(255, 180, 50, 0.25);
+
+  text-shadow:
+    1px 1px 0 #000,
+    2px 2px 4px rgba(0, 0, 0, 0.9);
+
+  /* Hanging Wooden Signboard Sway Animation */
+  animation: hhgWoodSway 4s ease-in-out infinite alternate;
 }
 
-@keyframes bwPulseSmooth {
-  0%, 100% {
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+@keyframes hhgWoodSway {
+  0% {
+    transform: rotate(-1.5deg) translateY(-2px) translateZ(0);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.75), 0 0 12px rgba(255, 180, 50, 0.2);
   }
+
   50% {
-    box-shadow: 0 0 25px rgba(255, 255, 255, 0.8), inset 0 0 0 2px rgba(255, 255, 255, 0.5);
+    transform: rotate(0deg) translateY(2px) translateZ(0);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.85), 0 0 20px rgba(255, 180, 50, 0.35);
+  }
+
+  100% {
+    transform: rotate(1.5deg) translateY(-2px) translateZ(0);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.75), 0 0 12px rgba(255, 180, 50, 0.2);
   }
 }
 
 .hhg-scroll-btn:hover {
-  transform: translateY(-4px) scale(1.05) translateZ(0);
+  transform: translateY(-4px) scale(1.05) translateZ(0) !important;
+  border-color: #A87547 !important;
+  box-shadow:
+    inset 0 1px 4px rgba(255, 235, 205, 0.4),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.9),
+    0 16px 35px rgba(0, 0, 0, 0.9),
+    0 0 25px rgba(255, 180, 50, 0.45) !important;
+}
+
+.hhg-scroll-btn:hover .btn-svg {
+  fill: #FFFFFF !important;
+  filter: drop-shadow(0 0 8px #FFCA28) drop-shadow(0 -2px 4px rgba(0, 0, 0, 0.8)) !important;
 }
 
 .hhg-scroll-btn:active {
-  transform: translateY(0px) scale(0.95) translateZ(0);
+  transform: translateY(1px) scale(0.96) translateZ(0) !important;
+}
+
+/* Individual letter wave animation */
+.txt-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-letter {
+  position: relative;
+  display: inline-block;
+  font-family: 'Trade Winds', 'New Rocker', 'Pirata One', cursive, sans-serif;
+  color: #E8E8E8;
+  letter-spacing: 1.5px;
+  text-shadow:
+    0 0 2px rgba(255, 255, 255, 0.7),
+    1px 1px 0 #000,
+    2px 2px 5px rgba(0, 0, 0, 0.95);
+  animation: letter-anim 2.2s ease-in-out infinite;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.btn-letter.green-letter {
+  color: #00FF88;
+  text-shadow: 0 0 8px rgba(0, 255, 136, 0.7);
+}
+
+@keyframes letter-anim {
+  50% {
+    text-shadow: 0 0 8px rgba(255, 220, 140, 0.9), 0 0 12px rgba(255, 180, 50, 0.8);
+    color: #FFFFFF;
+  }
+}
+
+.btn-svg {
+  height: 20px;
+  width: 20px;
+  margin-right: 0.4rem;
+  fill: #FFE6B3;
+  animation: flicker 2s linear infinite;
+  animation-delay: 0.5s;
+  filter: drop-shadow(0 0 4px rgba(255, 200, 100, 0.8));
+  transition: fill 0.3s ease, filter 0.3s ease;
+}
+
+@keyframes flicker {
+  50% {
+    opacity: 0.4;
+  }
 }
 
 .hhg-scroll-btn-text {
@@ -1212,7 +1384,7 @@ body {
   border-radius: 50%;
   background: #E8C840;
   cursor: pointer;
-  box-shadow: 0 0 12px rgba(232, 200, 64, 0.7), 0 2px 6px rgba(0,0,0,0.4);
+  box-shadow: 0 0 12px rgba(232, 200, 64, 0.7), 0 2px 6px rgba(0, 0, 0, 0.4);
   /* No transition — instant response for zero lag */
 }
 
@@ -2673,7 +2845,8 @@ body {
   border-radius: 20px;
   padding: 24px;
   width: 100%;
-  max-height: 80vh; /* Prevents overflow */
+  max-height: 80vh;
+  /* Prevents overflow */
   display: flex;
   flex-direction: column;
   color: #1a1a1a;
@@ -2695,7 +2868,7 @@ body {
   background: rgba(0, 0, 0, 0.05);
   padding: 4px 10px;
   border-radius: 12px;
-  border: 1px solid rgba(0,0,0,0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .hhg-free-badge-modern {
@@ -2751,7 +2924,8 @@ body {
   padding: 20px;
 }
 
-.hhg-upload-zone-modern:hover, .hhg-upload-zone-modern.drag {
+.hhg-upload-zone-modern:hover,
+.hhg-upload-zone-modern.drag {
   border-color: #1a5c2e;
   background: rgba(26, 92, 46, 0.05);
 }
@@ -2838,7 +3012,7 @@ body {
 }
 
 .btn-camera:hover {
-  background: rgba(0,0,0,0.05);
+  background: rgba(0, 0, 0, 0.05);
 }
 
 .hhg-upload-loading-modern {
@@ -2872,8 +3046,8 @@ body {
   aspect-ratio: 4/5;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .hhg-preview-thumbnail-modern img {
@@ -2907,23 +3081,69 @@ body {
   .hhg-step-card-modern {
     padding: 16px;
   }
-  
+
   .hhg-upload-btn-row-modern {
     flex-direction: column;
   }
-  
+
   .btn-modern {
     max-width: 100%;
   }
-  
+
   .hhg-step-title-block h2 {
     font-size: 22px;
   }
-}@media (max-width: 768px) { .hhg-hide-on-mobile { display: none !important; } }
-@media (max-width: 768px) { .hhg-hero-title-main { font-size: 26vw !important; line-height: 0.8 !important; } }
-@media (min-width: 769px) { .hhg-mobile-only { display: none !important; } }
+}
+
+@media (max-width: 768px) {
+  .hhg-hide-on-mobile {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .hhg-hero-title-main {
+    font-size: 26vw !important;
+    line-height: 0.8 !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .hhg-mobile-only {
+    display: none !important;
+  }
+}
+
 @media (max-width: 768px) {
   .hhg-cyber-bg-container g {
     animation: none !important;
   }
+}
+
+@media (max-width: 768px) {
+  .hhg-scroll-btn-wrap {
+    bottom: 135px !important;
+  }
+}
+
+/* Rustic Slatted Wooden Signboard Container & SVG */
+.hhg-wooden-signboard-container {
+  margin-top: 1rem;
+  width: 95%;
+  max-width: 440px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hhg-wooden-signboard-svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.7));
+  transition: transform 0.25s ease;
+}
+
+.hhg-wooden-signboard-svg:hover {
+  transform: scale(1.03);
 }

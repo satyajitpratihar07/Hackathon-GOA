@@ -133,7 +133,7 @@ export default function ErrorTerminal({ onClose }) {
           <div className="hhg-dash-header">
             <div className="hhg-dash-title">Cyber_Command // Dashboard</div>
             <input type="text" className="hhg-dash-search" placeholder="Search logs, IPs, or domains..." />
-            <button className="hhg-dash-close" onClick={onClose}>[ EXIT ]</button>
+            <button className="hhg-dash-close-red" onClick={onClose}>EXIT ✖</button>
           </div>
 
           <div className="hhg-dash-grid">

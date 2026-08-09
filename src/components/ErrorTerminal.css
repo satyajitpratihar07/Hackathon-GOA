@@ -274,24 +274,29 @@
 .hhg-dash-log.err { color: #FF3333; }
 .hhg-dash-log.solve { color: #10B981; }
 
-.hhg-dash-close {
+.hhg-dash-close-red {
   position: absolute;
   top: 20px;
   right: 20px;
-  background: transparent;
-  border: 1px solid #1E293B;
-  color: #94A3B8;
-  padding: 6px 12px;
-  border-radius: 4px;
+  background: #FF3333;
+  border: 1px solid #FF0000;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-family: monospace;
   cursor: pointer;
+  box-shadow: 0 0 10px rgba(255, 51, 51, 0.4);
   transition: all 0.2s;
-  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.hhg-dash-close:hover {
-  background: #FF3333;
-  color: #fff;
-  border-color: #FF3333;
+.hhg-dash-close-red:hover {
+  background: #E60000;
+  box-shadow: 0 0 15px rgba(255, 51, 51, 0.8);
+  transform: scale(1.05);
 }
 
 /* Mobile Responsiveness */
@@ -328,7 +333,7 @@
     width: 100%;
   }
 
-  .hhg-dash-close {
+  .hhg-dash-close-red {
     position: static;
     margin-top: 10px;
   }

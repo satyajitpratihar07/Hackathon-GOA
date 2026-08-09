@@ -1,69 +1,69 @@
 import React, { useState, useEffect } from 'react';
 import './InteractiveBook.css';
 
+const StylishClock = () => {
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const hours = time.getHours();
+  const minutes = time.getMinutes();
+  const seconds = time.getSeconds();
+
+  const hourDeg = (hours % 12) * 30 + minutes * 0.5;
+  const minuteDeg = minutes * 6;
+  const secondDeg = seconds * 6;
+
+  const digitalHours = hours.toString().padStart(2, '0');
+  const digitalMinutes = minutes.toString().padStart(2, '0');
+  const digitalSeconds = seconds.toString().padStart(2, '0');
+
+  return (
+    <div className="hhg-clock-container">
+      <div className="hhg-pendulum-clock">
+        <div className="clock-top">
+           <div className="clock-face">
+             {[...Array(12)].map((_, i) => (
+               <div key={i} className="clock-number" style={{ transform: `rotate(${(i + 1) * 30}deg)` }}>
+                 <span style={{ transform: `rotate(${-(i + 1) * 30}deg)` }}>{i + 1}</span>
+               </div>
+             ))}
+             <div className="hand hour-hand" style={{ transform: `rotate(${hourDeg}deg)` }}></div>
+             <div className="hand minute-hand" style={{ transform: `rotate(${minuteDeg}deg)` }}></div>
+             <div className="hand second-hand" style={{ transform: `rotate(${secondDeg}deg)` }}></div>
+             <div className="center-dot"></div>
+           </div>
+        </div>
+        <div className="clock-bottom">
+           <div className="pendulum">
+             <div className="pendulum-rod"></div>
+             <div className="pendulum-bob"></div>
+           </div>
+        </div>
+      </div>
+
+      <div className="hhg-stylish-digital-clock">
+        <div className="clock-time">
+          <span>{digitalHours}</span>
+          <span className="colon">:</span>
+          <span>{digitalMinutes}</span>
+          <span className="colon">:</span>
+          <span className="seconds">{digitalSeconds}</span>
+        </div>
+        <div className="clock-date">
+          {time.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }).toUpperCase()} // GOA, IN
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function InteractiveBook({ step, children, onOpen, onClose }) {
   const [isOpen, setIsOpen] = useState(step > 0);
   const [touchStart, setTouchStart] = useState(null);
-
-  const StylishClock = () => {
-    const [time, setTime] = useState(new Date());
-
-    useEffect(() => {
-      const timer = setInterval(() => setTime(new Date()), 1000);
-      return () => clearInterval(timer);
-    }, []);
-
-    const hours = time.getHours();
-    const minutes = time.getMinutes();
-    const seconds = time.getSeconds();
-
-    const hourDeg = (hours % 12) * 30 + minutes * 0.5;
-    const minuteDeg = minutes * 6;
-    const secondDeg = seconds * 6;
-
-    const digitalHours = hours.toString().padStart(2, '0');
-    const digitalMinutes = minutes.toString().padStart(2, '0');
-    const digitalSeconds = seconds.toString().padStart(2, '0');
-
-    return (
-      <div className="hhg-clock-container">
-        <div className="hhg-pendulum-clock">
-          <div className="clock-top">
-             <div className="clock-face">
-               {[...Array(12)].map((_, i) => (
-                 <div key={i} className="clock-number" style={{ transform: `rotate(${(i + 1) * 30}deg)` }}>
-                   <span style={{ transform: `rotate(${-(i + 1) * 30}deg)` }}>{i + 1}</span>
-                 </div>
-               ))}
-               <div className="hand hour-hand" style={{ transform: `rotate(${hourDeg}deg)` }}></div>
-               <div className="hand minute-hand" style={{ transform: `rotate(${minuteDeg}deg)` }}></div>
-               <div className="hand second-hand" style={{ transform: `rotate(${secondDeg}deg)` }}></div>
-               <div className="center-dot"></div>
-             </div>
-          </div>
-          <div className="clock-bottom">
-             <div className="pendulum">
-               <div className="pendulum-rod"></div>
-               <div className="pendulum-bob"></div>
-             </div>
-          </div>
-        </div>
-
-        <div className="hhg-stylish-digital-clock">
-          <div className="clock-time">
-            <span>{digitalHours}</span>
-            <span className="colon">:</span>
-            <span>{digitalMinutes}</span>
-            <span className="colon">:</span>
-            <span className="seconds">{digitalSeconds}</span>
-          </div>
-          <div className="clock-date">
-            {time.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }).toUpperCase()} // GOA, IN
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   useEffect(() => {
     if (step > 0) setIsOpen(true);
@@ -114,7 +114,7 @@ export default function InteractiveBook({ step, children, onOpen, onClose }) {
     const absDx = Math.abs(dx);
     const absDy = Math.abs(dy);
     
-    if (absDx > absDy && absDx > 40) {
+    if (absDx > absDy * 1.5 && absDx > 70) {
       // Horizontal Swipe
       if (dx > 0) {
         const nextBtn = document.querySelector('.hhg-active-page .hhg-book-page-front .btn-yellow:not(:disabled)');
@@ -214,12 +214,10 @@ export default function InteractiveBook({ step, children, onOpen, onClose }) {
             cursor: 'pointer'
           }}
           onClick={handleCoverClick}
-          onTouchEnd={handleCoverClick}
         >
           <div 
             className="hhg-book-page-front cover-front"
             onClick={handleCoverClick}
-            onTouchEnd={handleCoverClick}
           >
             <div className="cover-click-hint">
               <span className="pulse-icon">👆</span> CLICK TO OPEN

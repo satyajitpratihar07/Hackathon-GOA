@@ -21,11 +21,7 @@ async function getTinyPhotoThumbnail(src, cropData) {
 
         if (cropData?.crop) {
           const { x, y, width, height } = cropData.crop;
-          const sx = (x / 100) * img.naturalWidth;
-          const sy = (y / 100) * img.naturalHeight;
-          const sw = (width / 100) * img.naturalWidth;
-          const sh = (height / 100) * img.naturalHeight;
-          ctx.drawImage(img, sx, sy, sw, sh, 0, 0, 40, 40);
+          ctx.drawImage(img, x, y, width, height, 0, 0, 40, 40);
         } else {
           const min = Math.min(img.naturalWidth, img.naturalHeight);
           const sx = (img.naturalWidth - min) / 2;
@@ -262,85 +258,104 @@ export default function Step5Generate({ format, frameStyle, cropData, imageSrc, 
         <p>Download, copy, or share directly to X with <span style={{ color: '#FF1B8D' }}>#FrameInGoa</span></p>
       </div>
 
-      <div className="gen-layout" style={{ display: 'flex', justifyContent: 'center' }}>
-
-
-        {/* Previews */}
-        <div style={{ display: 'flex', gap: '20px', flex: 1, minWidth: 0, justifyContent: 'center' }}>
-          
-          {/* Left Page (Portaled) - Live Preview + Actions */}
-          {leftPageNode && createPortal(
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', width: '100%', height: '100%', padding: '20px', gap: '15px', overflowY: 'auto' }}>
-              <div className="preview-wrap" style={{ width: '80%', maxWidth: '380px' }}>
-                <div className="preview-lbl" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>Live Preview</div>
-                <div className={`preview-frame ${done && inBook ? 'emerge-animation' : ''}`} style={{ position: 'relative' }}>
-                  <canvas 
-                    ref={canvasRef} 
-                    style={{ 
-                      display: 'block', 
-                      width: '100%', 
-                      height: 'auto', 
-                      maxHeight: '38vh',
-                      boxShadow: '0 20px 40px rgba(0,0,0,0.3)'
-                    }} 
-                  />
-                  {generating && (
-                    <div className="preview-overlay">
-                      <div className="spinner" />
-                      <div className="spin-lbl">Generating your badge…</div>
-                    </div>
-                  )}
-                </div>
-                {done && (
-                  <div className="preview-meta" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)', color: '#fff' }}>
-                    {format === 'pfp' ? '1080×1080' : '1080×680'} px · PNG · #FrameInGoa
+      <div className="gen-layout" style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+        
+        {/* Left Page (Portaled) - Live Preview */}
+        {leftPageNode && createPortal(
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', padding: '20px' }}>
+            <div className="preview-wrap" style={{ width: '80%', maxWidth: '380px' }}>
+              <div className="preview-lbl" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>Live Preview</div>
+              <div className={`preview-frame ${done && inBook ? 'emerge-animation' : ''}`} style={{ position: 'relative' }}>
+                <canvas 
+                  ref={canvasRef} 
+                  style={{ 
+                    display: 'block', 
+                    maxWidth: '100%', 
+                    maxHeight: '55vh',
+                    width: 'auto',
+                    height: 'auto',
+                    objectFit: 'contain',
+                    margin: '0 auto',
+                    boxShadow: '0 20px 40px rgba(0,0,0,0.3)'
+                  }} 
+                />
+                {generating && (
+                  <div className="preview-overlay">
+                    <div className="spinner" />
+                    <div className="spin-lbl">Generating your badge…</div>
                   </div>
                 )}
               </div>
-
-              {/* Actions (Moved under the Preview on the Left Page) */}
-              <div className="desktop-actions" style={{ width: '80%', maxWidth: '380px' }}>
-                {actionsContent}
-              </div>
-            </div>,
-            leftPageNode
-          )}
-
-          {/* Generated Badge Preview (Stays on Right Page, replaces 3D lanyard) */}
-          {format === 'id' && done && lanyardImageSrc && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center', width: '100%', maxWidth: '380px' }}>
-              <div className="preview-wrap mobile-2d-preview" style={{ width: '100%' }}>
-                <div className="preview-lbl">Your Generated Badge</div>
-                <div className={`preview-frame ${done && inBook ? 'emerge-animation' : ''}`} style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>
-                  <img src={lanyardImageSrc} alt="Badge Preview" style={{ width: '100%', height: 'auto', display: 'block' }} />
+              {done && (
+                <div className="preview-meta" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)', color: '#fff', textAlign: 'center', marginTop: '10px' }}>
+                  {format === 'pfp' ? '1080×1080' : '1080×1620'} px · PNG · #FrameInGoa
                 </div>
-              </div>
+              )}
+            </div>
+          </div>,
+          leftPageNode
+        )}
 
-              {/* Navigation Actions (Moved to Right Page so they aren't hidden by overflow) */}
-              <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
-                <button className="act-btn cancelbtn btn-ghost" style={{ flex: 1, padding: '10px' }} onClick={onBack}>
-                  <div className="act-icon">←</div>
-                  <div>
-                    <span className="act-main" style={{ fontSize: '13px' }}>Back</span>
+        {/* Right Page Content */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', alignItems: 'center', width: '100%', maxWidth: '380px' }}>
+          
+          {/* On Mobile (or if portal is not active), show the 2D Canvas Preview here */}
+          {!leftPageNode && (
+            <div className="preview-wrap" style={{ width: '100%' }}>
+              <div className="preview-lbl">Live Preview</div>
+              <div className="preview-frame" style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden' }}>
+                <canvas 
+                  ref={canvasRef} 
+                  style={{ 
+                    display: 'block', 
+                    width: '100%', 
+                    height: 'auto', 
+                    maxHeight: '32vh',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
+                  }} 
+                />
+                {generating && (
+                  <div className="preview-overlay">
+                    <div className="spinner" />
+                    <div className="spin-lbl">Generating…</div>
                   </div>
-                </button>
-                <button className="act-btn cancelbtn" style={{ flex: 1, padding: '10px' }} onClick={onReset}>
-                  <div className="act-icon">↩</div>
-                  <div>
-                    <span className="act-main" style={{ fontSize: '13px' }}>Reset</span>
-                  </div>
-                </button>
-              </div>
-
-              {/* Mobile Actions Panel (Hidden on Desktop) */}
-              <div className="mobile-actions" style={{ width: '100%', marginTop: '20px' }}>
-                {actionsContent}
+                )}
               </div>
             </div>
           )}
 
+          {/* Generated Badge Preview (Stays on Right Page) */}
+          {format === 'id' && done && lanyardImageSrc && (
+            <div className="preview-wrap mobile-2d-preview" style={{ width: '100%' }}>
+              <div className="preview-lbl">Your Generated Badge</div>
+              <div className={`preview-frame ${done && inBook ? 'emerge-animation' : ''}`} style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>
+                <img src={lanyardImageSrc} alt="Badge Preview" style={{ width: '100%', height: 'auto', display: 'block' }} />
+              </div>
+            </div>
+          )}
+
+          {/* Actions panel (Always visible on Desktop & Mobile) */}
+          {actionsContent}
+
+          {/* Navigation Actions (Back / Reset) */}
+          <div style={{ display: 'flex', gap: '10px', width: '100%', marginTop: '10px' }}>
+            <button className="act-btn cancelbtn btn-ghost" style={{ flex: 1, padding: '10px' }} onClick={onBack}>
+              <div className="act-icon">←</div>
+              <div>
+                <span className="act-main" style={{ fontSize: '13px' }}>Back</span>
+              </div>
+            </button>
+            <button className="act-btn cancelbtn" style={{ flex: 1, padding: '10px' }} onClick={onReset}>
+              <div className="act-icon">↩</div>
+              <div>
+                <span className="act-main" style={{ fontSize: '13px' }}>Reset</span>
+              </div>
+            </button>
+          </div>
+
         </div>
       </div>
+
       {/* Full Size Image Modal via Portal */}
       {isModalOpen && typeof document !== 'undefined' && createPortal(
         <div 

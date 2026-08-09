@@ -511,6 +511,12 @@
   padding: 15px;
 }
 
+@media (max-width: 768px) {
+  .hhg-book-page-content {
+    overflow-x: auto !important;
+  }
+}
+
 /* Hide scrollbar for clean pages */
 .hhg-book-page-content::-webkit-scrollbar {
   width: 4px;

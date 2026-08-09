@@ -56,7 +56,7 @@ export default function Step2Adjust({ imageSrc, onNext, onBack }) {
           image={imageSrc}
           crop={crop}
           zoom={zoom}
-          minZoom={0.5}
+          minZoom={0.1}
           maxZoom={3}
           rotation={rotation}
           aspect={1}
@@ -91,15 +91,20 @@ export default function Step2Adjust({ imageSrc, onNext, onBack }) {
             <span>🔍 ZOOM</span>
             <span>{zoom.toFixed(1)}×</span>
           </div>
-          <input
-            className="slider"
-            type="range"
-            min={0.5}
-            max={3}
-            step={0.05}
-            value={zoom}
-            onChange={e => setZoom(Number(e.target.value))}
-          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button type="button" className="btn btn-ghost" style={{ padding: 0, width: 24, height: 24, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setZoom(z => Math.max(0.1, z - 0.1))}>-</button>
+            <input
+              className="slider"
+              style={{ flex: 1 }}
+              type="range"
+              min={0.1}
+              max={3}
+              step={0.05}
+              value={zoom}
+              onChange={e => setZoom(Number(e.target.value))}
+            />
+            <button type="button" className="btn btn-ghost" style={{ padding: 0, width: 24, height: 24, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setZoom(z => Math.min(3, z + 0.1))}>+</button>
+          </div>
         </div>
 
         {/* Rotate */}
@@ -108,15 +113,20 @@ export default function Step2Adjust({ imageSrc, onNext, onBack }) {
             <span>🔄 ROTATE</span>
             <span>{rotation}°</span>
           </div>
-          <input
-            className="slider"
-            type="range"
-            min={-180}
-            max={180}
-            step={1}
-            value={rotation}
-            onChange={e => setRotation(Number(e.target.value))}
-          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button type="button" className="btn btn-ghost" style={{ padding: 0, width: 24, height: 24, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setRotation(r => Math.max(-10, r - 1))}>-</button>
+            <input
+              className="slider"
+              style={{ flex: 1 }}
+              type="range"
+              min={-10}
+              max={10}
+              step={1}
+              value={rotation}
+              onChange={e => setRotation(Number(e.target.value))}
+            />
+            <button type="button" className="btn btn-ghost" style={{ padding: 0, width: 24, height: 24, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setRotation(r => Math.min(10, r + 1))}>+</button>
+          </div>
         </div>
       </div>
 

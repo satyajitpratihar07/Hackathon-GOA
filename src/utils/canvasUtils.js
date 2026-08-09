@@ -1,18 +1,19 @@
 import QRCode from 'qrcode';
+import JsBarcode from 'jsbarcode';
 
 
 const COLORS = {
-  greenDeep:    '#0D3B1E',
-  greenDark:    '#102D18',
-  greenMid:     '#1A4A2E',
-  greenLight:   '#2D6B44',
-  yellow:       '#E8C840',
+  greenDeep: '#0D3B1E',
+  greenDark: '#102D18',
+  greenMid: '#1A4A2E',
+  greenLight: '#2D6B44',
+  yellow: '#E8C840',
   yellowBright: '#F5D800',
-  pink:         '#FF1B8D',
-  pinkDark:     '#C4006A',
-  pinkLight:    '#FF6BB5',
-  white:        '#FFFFFF',
-  black:        '#0A0A0A',
+  pink: '#FF1B8D',
+  pinkDark: '#C4006A',
+  pinkLight: '#FF6BB5',
+  white: '#FFFFFF',
+  black: '#0A0A0A',
 };
 
 // ────────────────────────────────────────────
@@ -201,17 +202,30 @@ export const FRAME_STYLES = {
     glow: true
   },
   neon: {
-    name: 'Neon',
+    name: 'Neon Poster',
     emoji: '⚡',
-    borderColor: '#00FF88',
-    accentColor: COLORS.pink,
-    bgStart: '#0A2A1A',
-    bgEnd: '#050E12',
-    badgeStart: '#004422',
-    badgeEnd: '#00FF88',
-    badgeBorder: '#00FF88',
-    graphics: ['grid', 'scanlines'],
+    borderColor: '#00F0FF',
+    accentColor: '#FF1B8D',
+    bgStart: '#0A0A1A',
+    bgEnd: '#050510',
+    badgeStart: '#00F0FF',
+    badgeEnd: '#0080FF',
+    badgeBorder: '#00F0FF',
+    graphics: [],
     glow: true
+  },
+  vintage: {
+    name: 'Vintage Goa',
+    emoji: '🌴',
+    borderColor: '#2E7D32',
+    accentColor: '#D84315',
+    bgStart: '#F5E6C8',
+    bgEnd: '#E8D5A3',
+    badgeStart: '#1B5E20',
+    badgeEnd: '#2E7D32',
+    badgeBorder: '#E8C840',
+    graphics: [],
+    glow: false
   },
   beach: {
     name: 'Beach',
@@ -273,7 +287,7 @@ export async function drawPFPFrame(canvas, imageSrc, frameStyle = 'classic', cro
 
   // Decorative graphics based on theme
   const hasGraphic = (g) => style.graphics && style.graphics.includes(g);
-  
+
   if (hasGraphic('grid')) drawTechGrid(ctx, SIZE, SIZE, style.borderColor);
   if (hasGraphic('scanlines')) drawScanlines(ctx, SIZE, SIZE, style.borderColor);
   if (hasGraphic('sunburst')) drawSunburst(ctx, cx, photoCy, photoR + 120, 24, style.borderColor, 0.15);
@@ -296,7 +310,7 @@ export async function drawPFPFrame(canvas, imageSrc, frameStyle = 'classic', cro
     drawPalmTree(ctx, 120, SIZE - 100, 1.2, 0.25);
     drawPalmTree(ctx, SIZE - 120, SIZE - 80, 1.0, 0.20);
   }
-  
+
   if (hasGraphic('waves')) {
     drawWaves(ctx, 0, SIZE * 0.88, SIZE, 40, COLORS.white, 0.12);
   }
@@ -406,7 +420,7 @@ async function drawRealQRCode(ctx, x, y, size, dataString) {
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = size;
     tempCanvas.height = size;
-    
+
     // Draw QR Code in black on white background
     await QRCode.toCanvas(tempCanvas, dataString, {
       margin: 2,
@@ -419,7 +433,7 @@ async function drawRealQRCode(ctx, x, y, size, dataString) {
     });
 
     const tempCtx = tempCanvas.getContext('2d');
-    
+
     // Use 'screen' or 'lighten' to dye the black pixels into the gradient!
     // Black + Purple = Purple. White + Purple = White.
     tempCtx.globalCompositeOperation = 'screen';
@@ -476,6 +490,15 @@ export function generateBadgeId(name, stack) {
 }
 
 export async function drawIDCard(canvas, imageSrc, userData, frameStyle = 'classic', cropData = null, qrUrl = null) {
+  if (frameStyle === 'neon') {
+    await drawNeonPosterIDCard(canvas, imageSrc, userData, cropData, qrUrl);
+    return;
+  }
+  if (frameStyle === 'vintage') {
+    await drawVintageGoaIDCard(canvas, imageSrc, userData, cropData, qrUrl);
+    return;
+  }
+
   const ctx = canvas.getContext('2d');
   const W = 1080;
   const H = 680;
@@ -490,7 +513,7 @@ export async function drawIDCard(canvas, imageSrc, userData, frameStyle = 'class
     hacker: '/hacker_id_bg.png',
     royal: '/royal_id_bg.png'
   };
-  
+
   const bgPath = backgrounds[frameStyle] || backgrounds.sunset;
   const bgImg = await loadImage(bgPath).catch(() => null);
   if (bgImg) {
@@ -526,19 +549,13 @@ export async function drawIDCard(canvas, imageSrc, userData, frameStyle = 'class
   const tcSecondary = isDarkTheme ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)';
   const tcTertiary = isDarkTheme ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)';
 
-  // 3. Top Header Text
-  ctx.fillStyle = tcTertiary;
-  ctx.font = '700 16px "Unbounded", sans-serif';
-  ctx.textAlign = 'left';
-  ctx.letterSpacing = '3px';
-  ctx.fillText('PREMIUM BUILDER IDENTITY CARD', 80, 70);
-  ctx.letterSpacing = '0px';
+  // 3. Top Header Text (Removed as per user request)
 
   // 4. Profile Photo (Left Side)
   const photoSize = 340;
   const photoX = 80;
   const photoY = 120;
-  
+
   // Subtle glowing outer stroke
   ctx.save();
   ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
@@ -563,7 +580,7 @@ export async function drawIDCard(canvas, imageSrc, userData, frameStyle = 'class
   // Inner inset stroke
   ctx.strokeStyle = 'rgba(255,215,0,0.6)';
   ctx.lineWidth = 2;
-  roundRect(photoX+2, photoY+2, photoSize-4, photoSize-4, 22, true, false);
+  roundRect(photoX + 2, photoY + 2, photoSize - 4, photoSize - 4, 22, true, false);
 
   // 5. Typography on Right Side
   const textX = photoX + photoSize + 50;
@@ -616,24 +633,24 @@ export async function drawIDCard(canvas, imageSrc, userData, frameStyle = 'class
   textY += 15;
   const stacks = (userData.stack || 'REACT, NEXT.JS').split(/[,|]/).map(s => s.trim().toUpperCase()).slice(0, 4);
   if (stacks.length === 0) stacks.push('DEV');
-  
+
   let pillX = textX;
   const pillY = textY;
   const pillH = 34;
   ctx.font = '700 14px "Space Mono", monospace';
-  
+
   stacks.forEach(s => {
     const textWidth = ctx.measureText(s).width;
     const pillW = textWidth + 30;
-    
+
     // Pill background
     ctx.fillStyle = 'rgba(15, 23, 42, 0.7)'; // Dark slate
     roundRect(pillX, pillY, pillW, pillH, 17, false, true);
     // Pill text
     ctx.fillStyle = '#FFF';
     ctx.textAlign = 'center';
-    ctx.fillText(s, pillX + pillW/2, pillY + 22);
-    
+    ctx.fillText(s, pillX + pillW / 2, pillY + 22);
+
     pillX += pillW + 12;
   });
   ctx.textAlign = 'left'; // reset
@@ -643,7 +660,7 @@ export async function drawIDCard(canvas, imageSrc, userData, frameStyle = 'class
   const qrX = W - 410;
   const qrY = H - 270;
   const qrDataStr = qrUrl || `https://hhgoa.com/pass?u=${encodeURIComponent(userData.name || 'builder')}`;
-  
+
   // Draw subtle dark background for QR for contrast
   ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
   roundRect(qrX - 5, qrY - 5, qrSize + 10, qrSize + 10, 12, false, true);
@@ -682,6 +699,36 @@ export async function drawIDCard(canvas, imageSrc, userData, frameStyle = 'class
   ctx.fillStyle = '#FFF';
   ctx.font = '700 14px "Unbounded", sans-serif';
   ctx.fillText('GOA', hexX, hexY + 26);
+
+  // 8. Barcode and Builder ID under the photo (y = 480 to 620)
+  const barY = H - 180;
+  const barX = 80;
+  const barW = 340;
+
+  ctx.fillStyle = tcSecondary;
+  ctx.font = '700 12px "Space Mono", monospace';
+  ctx.letterSpacing = '2px';
+  ctx.textAlign = 'left';
+  ctx.fillText('BUILDER ID', barX, barY + 15);
+  ctx.letterSpacing = '0px';
+
+  const badgeId = generateBadgeId(userData.name || '', userData.stack || '');
+  ctx.fillStyle = tcPrimary;
+  ctx.font = '700 16px "Space Mono", monospace';
+  ctx.fillText('#HH-GOA-' + badgeId.replace('HHG26-', ''), barX, barY + 38);
+
+  // Barcode lines
+  ctx.fillStyle = isDarkTheme ? 'rgba(255, 255, 255, 0.85)' : 'rgba(0, 0, 0, 0.85)';
+  let bx = barX;
+  const barcodeHeight = 45;
+  const barcodeY = barY + 52;
+  let seedVal = 13;
+  while (bx < barX + barW) {
+    const bw = (seedVal % 5) + 1.5;
+    seedVal = (seedVal * 7 + 3) % 23;
+    ctx.fillRect(bx, barcodeY, bw, barcodeHeight);
+    bx += bw + (seedVal % 4) + 1.5;
+  }
 }
 
 // ────────────────────────────────────────────
@@ -718,13 +765,7 @@ function drawCoveredImage(ctx, img, x, y, w, h) {
 
 function drawCroppedImage(ctx, img, cropData, x, y, w, h) {
   const { x: cx, y: cy, width: cw, height: ch } = cropData;
-  const naturalW = img.naturalWidth;
-  const naturalH = img.naturalHeight;
-  const sx = (cx / 100) * naturalW;
-  const sy = (cy / 100) * naturalH;
-  const sw = (cw / 100) * naturalW;
-  const sh = (ch / 100) * naturalH;
-  ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+  ctx.drawImage(img, cx, cy, cw, ch, x, y, w, h);
 }
 
 export function canvasToPNGBlob(canvas) {
@@ -737,4 +778,847 @@ export function downloadCanvas(canvas, filename = 'hhgoa-frame.png') {
   a.href = url;
   a.download = filename;
   a.click();
+}
+
+// ────────────────────────────────────────────
+// Custom Neon Poster ID Card Renderer
+// Builds entire poster from scratch — same as reference image
+// ────────────────────────────────────────────
+async function drawNeonPosterIDCard(canvas, imageSrc, userData, cropData, qrUrl) {
+  const ctx = canvas.getContext('2d');
+  const W = 1080;
+  const H = 1540;
+  canvas.width = W;
+  canvas.height = H;
+
+  const glow = (color, blur = 20) => { ctx.shadowColor = color; ctx.shadowBlur = blur; };
+  const resetGlow = () => { ctx.shadowBlur = 0; ctx.shadowColor = 'transparent'; };
+  const rr = (x, y, w, h, r) => {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  };
+
+  // 1. BACKGROUND
+  // Load the newly generated AI Goa vibe background!
+  const bgPath = '/cyber_goa_bg.png';
+  const bgImg = await new Promise((resolve) => {
+    const i = new Image();
+    i.crossOrigin = 'anonymous';
+    i.onload = () => resolve(i);
+    i.onerror = () => resolve(null);
+    i.src = bgPath;
+  });
+
+  if (bgImg) {
+    // Draw the stunning generated cyber goa background to cover the entire canvas
+    ctx.drawImage(bgImg, 0, 0, W, H);
+    
+    // Add a slight dark glassmorphism overlay so the neon UI still pops beautifully!
+    ctx.fillStyle = 'rgba(5, 12, 31, 0.6)';
+    ctx.fillRect(0, 0, W, H);
+  } else {
+    // Fallback original background
+    const bg = ctx.createRadialGradient(W / 2, H * 0.35, 0, W / 2, H * 0.5, H * 0.8);
+    bg.addColorStop(0, '#0D1B3E');
+    bg.addColorStop(0.5, '#050C1F');
+    bg.addColorStop(1, '#020812');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // Stars
+    const seed = 42;
+    for (let i = 0; i < 180; i++) {
+      const sx = ((i * 137 + seed) % W);
+      const sy = ((i * 97 + seed) % (H * 0.7));
+      const sr = (i % 3 === 0) ? 1.5 : 0.8;
+      ctx.fillStyle = `rgba(255,255,255,${0.4 + (i % 5) * 0.1})`;
+      ctx.beginPath(); ctx.arc(sx, sy, sr, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // Subtle teal glow pool behind circle
+    const pool = ctx.createRadialGradient(W / 2, 660, 0, W / 2, 660, 500);
+    pool.addColorStop(0, 'rgba(0, 180, 200, 0.18)');
+    pool.addColorStop(1, 'transparent');
+    ctx.fillStyle = pool;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  // 2. OUTER BORDER
+  ctx.save();
+  glow('#00F0FF', 12);
+  ctx.strokeStyle = '#00F0FF';
+  ctx.lineWidth = 3;
+  rr(16, 16, W - 32, H - 32, 24);
+  ctx.stroke();
+  resetGlow();
+
+  // corner tech brackets
+  const bk = (x, y, fx, fy) => {
+    ctx.beginPath();
+    ctx.moveTo(x + fx * 50, y);
+    ctx.lineTo(x, y);
+    ctx.lineTo(x, y + fy * 50);
+    ctx.stroke();
+  };
+  ctx.lineWidth = 4;
+  glow('#00F0FF', 14);
+  bk(20, 20, 1, 1);
+  bk(W - 20, 20, -1, 1);
+  bk(20, H - 20, 1, -1);
+  bk(W - 20, H - 20, -1, -1);
+  resetGlow();
+  ctx.restore();
+
+  // 3. TOP DECORATIONS
+
+  // GOA INDIA stamp (top-left)
+  ctx.save();
+  ctx.strokeStyle = '#4A8F6A';
+  ctx.lineWidth = 4;
+  rr(40, 40, 150, 110, 8);
+  ctx.stroke();
+  ctx.fillStyle = '#122A1A';
+  rr(40, 40, 150, 110, 8);
+  ctx.fill();
+  ctx.fillStyle = '#1A4A2E';
+  rr(48, 48, 134, 80, 4);
+  ctx.fill();
+  // sunset gradient in stamp
+  const sunStamp = ctx.createLinearGradient(50, 60, 50, 120);
+  sunStamp.addColorStop(0, '#1A6B3A');
+  sunStamp.addColorStop(0.5, '#FF7B54');
+  sunStamp.addColorStop(1, '#E8C840');
+  ctx.fillStyle = sunStamp;
+  ctx.fillRect(50, 50, 132, 76);
+  ctx.fillStyle = 'rgba(0,0,0,0.5)';
+  ctx.fillRect(100, 62, 4, 40);
+  ctx.beginPath(); ctx.arc(102, 70, 16, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = 'bold 13px "Unbounded", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('GOA', 115, 140);
+  ctx.font = 'bold 10px "Space Mono", monospace';
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.fillText('INDIA', 115, 154);
+  ctx.restore();
+
+  // HH GOA 2026 pink badge (Removed as per user request)
+
+  // BUILD IN GOA circular stamp (top-right)
+  ctx.save();
+  glow('#00F0FF', 8);
+  ctx.strokeStyle = '#4A8F6A';
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(W - 100, 100, 70, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(W - 100, 100, 58, 0, Math.PI * 2); ctx.stroke();
+  resetGlow();
+  ctx.fillStyle = '#1A6B3A';
+  ctx.font = '22px serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('🌴', W - 100, 108);
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.font = '700 9px "Space Mono", monospace';
+  const circ = 'BUILD IN GOA · SHIP FROM PARADISE · ';
+  const circArr = circ.split('');
+  circArr.forEach((ch, i) => {
+    const a = (i / circArr.length) * Math.PI * 2 - Math.PI / 2;
+    ctx.save();
+    ctx.translate(W - 100 + Math.cos(a) * 64, 100 + Math.sin(a) * 64);
+    ctx.rotate(a + Math.PI / 2);
+    ctx.fillText(ch, 0, 0);
+    ctx.restore();
+  });
+  ctx.restore();
+
+  // 4. TITLE
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = '900 70px "Unbounded", sans-serif';
+  glow('#FFFFFF', 8);
+  ctx.fillText('HACKER', W / 2 - 168, 218);
+  resetGlow();
+  ctx.fillStyle = '#FF1B8D';
+  ctx.font = '900 68px serif';
+  glow('#FF1B8D', 20);
+  ctx.fillText('गोवा', W / 2 + 8, 218);
+  resetGlow();
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = '900 70px "Unbounded", sans-serif';
+  glow('#FFFFFF', 8);
+  ctx.fillText('HOUSE', W / 2 + 210, 218);
+  resetGlow();
+  ctx.restore();
+
+  // Subtitle
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(180,210,255,0.6)';
+  ctx.font = '500 17px "Space Mono", monospace';
+  ctx.fillText('CODE.  COLLABORATE.  CREATE HISTORY.', W / 2, 248);
+  ctx.restore();
+
+  // 5. LEFT SIDEBAR
+  ctx.save();
+  ctx.fillStyle = '#FF1B8D';
+  ctx.font = '900 20px "Unbounded", sans-serif';
+  ctx.save();
+  ctx.translate(38, 490);
+  ctx.rotate(-Math.PI / 2);
+  glow('#FF1B8D', 10);
+  ctx.textAlign = 'center';
+  ctx.fillText('28 – 31  OCT  2026', 0, 0);
+  resetGlow();
+  ctx.restore();
+  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  ctx.font = '600 14px "Space Mono", monospace';
+  ctx.save();
+  ctx.translate(38, 700);
+  ctx.rotate(-Math.PI / 2);
+  ctx.textAlign = 'center';
+  ctx.fillText('GOA  ·  INDIA', 0, 0);
+  ctx.restore();
+  ctx.restore();
+
+  // BUILD / SHIP / REPEAT signs
+  ctx.save();
+  const signs = [
+    { label: '⚓ BUILD', color: '#E8C840', y: 760 },
+    { label: '🚢 SHIP', color: '#FF1B8D', y: 824 },
+    { label: '🔁 REPEAT', color: '#00F0FF', y: 888 },
+  ];
+  signs.forEach(s => {
+    ctx.fillStyle = s.color + '22';
+    rr(42, s.y, 160, 44, 8);
+    ctx.fill();
+    glow(s.color, 10);
+    ctx.strokeStyle = s.color;
+    ctx.lineWidth = 2;
+    rr(42, s.y, 160, 44, 8);
+    ctx.stroke();
+    resetGlow();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 17px "Unbounded", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(s.label, 122, s.y + 28);
+  });
+  ctx.restore();
+
+  // 6. RIGHT SIDE: LET'S BUILD badge
+  ctx.save();
+  ctx.fillStyle = '#E8C840';
+  rr(W - 210, 460, 168, 94, 14);
+  ctx.fill();
+  ctx.fillStyle = '#000000';
+  ctx.font = 'bold 28px "Unbounded", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText("LET'S", W - 126, 510);
+  ctx.fillText('BUILD!', W - 126, 544);
+  ctx.restore();
+
+  // 7. CENTER PHOTO CIRCLE
+  const cx = W / 2;
+  const cy = 650;
+  const photoR = 306;
+
+  // Outer glow rings
+  ctx.save();
+  for (let i = 3; i >= 1; i--) {
+    ctx.strokeStyle = `rgba(0, 240, 255, ${0.07 * i})`;
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(cx, cy, photoR + 28 + i * 18, 0, Math.PI * 2); ctx.stroke();
+  }
+  ctx.restore();
+
+  // Clip & draw user photo
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, photoR, 0, Math.PI * 2);
+  ctx.clip();
+  const img = await loadImage(imageSrc);
+  if (cropData) {
+    drawCroppedImage(ctx, img, cropData, cx - photoR, cy - photoR, photoR * 2, photoR * 2);
+  } else {
+    drawCoveredImage(ctx, img, cx - photoR, cy - photoR, photoR * 2, photoR * 2);
+  }
+  ctx.restore();
+
+  // Photo ring borders
+  ctx.save();
+  ctx.lineWidth = 16;
+  ctx.strokeStyle = '#FF1B8D';
+  glow('#FF1B8D', 30);
+  ctx.beginPath(); ctx.arc(cx, cy, photoR + 8, 0, Math.PI * 2); ctx.stroke();
+  ctx.lineWidth = 8;
+  ctx.strokeStyle = '#00F0FF';
+  glow('#00F0FF', 22);
+  ctx.beginPath(); ctx.arc(cx, cy, photoR + 22, 0, Math.PI * 2); ctx.stroke();
+  resetGlow();
+  ctx.restore();
+
+  // "BUILD · INNOVATE · IMPACT" arc text
+  ctx.save();
+  ctx.fillStyle = 'rgba(200,220,255,0.65)';
+  ctx.font = '600 15px "Space Mono", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('BUILD  ·  INNOVATE  ·  IMPACT', cx, cy - photoR - 32);
+  ctx.restore();
+
+  // 8. NAME BAR
+  const nameBarY = cy + photoR + 28;
+
+  // Tech connector dots
+  ctx.save();
+  glow('#00F0FF', 8);
+  ctx.strokeStyle = '#00F0FF';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(cx - 340, nameBarY + 35);
+  ctx.lineTo(cx - 240, nameBarY + 35);
+  ctx.moveTo(cx + 240, nameBarY + 35);
+  ctx.lineTo(cx + 340, nameBarY + 35);
+  ctx.stroke();
+  ctx.fillStyle = '#00F0FF';
+  [-210, -192, -175].forEach(ox => { ctx.beginPath(); ctx.arc(cx + ox, nameBarY + 35, 4, 0, Math.PI * 2); ctx.fill(); });
+  [175, 192, 210].forEach(ox => { ctx.beginPath(); ctx.arc(cx + ox, nameBarY + 35, 4, 0, Math.PI * 2); ctx.fill(); });
+  resetGlow();
+  ctx.restore();
+
+  ctx.save();
+  ctx.fillStyle = 'rgba(8, 16, 40, 0.92)';
+  rr(cx - 340, nameBarY, 680, 70, 10);
+  ctx.fill();
+  glow('#00F0FF', 14);
+  ctx.strokeStyle = '#00F0FF';
+  ctx.lineWidth = 2;
+  rr(cx - 340, nameBarY, 680, 70, 10);
+  ctx.stroke();
+  resetGlow();
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = '900 38px "Unbounded", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText((userData.name || 'BUILDER').toUpperCase(), cx, nameBarY + 35);
+  ctx.restore();
+
+  // Handle / Initials bar (yellow)
+  const handleBarY = nameBarY + 88;
+  ctx.save();
+  ctx.fillStyle = '#E8C840';
+  rr(cx - 240, handleBarY, 480, 56, 28);
+  ctx.fill();
+  ctx.fillStyle = '#C4006A';
+  ctx.font = 'bold 20px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('⚡', cx - 175, handleBarY + 28);
+  ctx.fillText('⚡', cx + 175, handleBarY + 28);
+  ctx.fillStyle = '#0A0A0A';
+  ctx.font = '900 24px "Unbounded", sans-serif';
+  const initials = (userData.name || 'HH').split(' ').map(n => n[0] || '').join('').substring(0, 3).toUpperCase();
+  ctx.fillText(initials, cx, handleBarY + 28);
+  ctx.restore();
+
+  // 9. BOTTOM 3 COLUMNS
+  const bottomY = handleBarY + 80;
+  const colW = W / 3;
+
+  // Separator lines
+  ctx.save();
+  ctx.strokeStyle = 'rgba(0,240,255,0.25)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([6, 5]);
+  [colW, colW * 2].forEach(x => {
+    ctx.beginPath(); ctx.moveTo(x, bottomY); ctx.lineTo(x, H - 80); ctx.stroke();
+  });
+  ctx.setLineDash([]);
+  ctx.restore();
+
+  // LEFT COLUMN — BUILDER CLASS
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(180,210,255,0.75)';
+  ctx.font = '700 14px "Space Mono", monospace';
+  ctx.fillText('— BUILDER CLASS  >>', colW / 2, bottomY + 24);
+  ctx.fillStyle = '#FF1B8D';
+  glow('#FF1B8D', 14);
+  ctx.font = '900 21px "Unbounded", sans-serif';
+  const bClass = generateBuilderTitle(userData.name || '', userData.stack || '');
+  const bWords = bClass.toUpperCase().split(' ');
+  ctx.fillText(bWords[0] || 'TERMINAL', colW / 2, bottomY + 56);
+  ctx.fillText(bWords[1] || 'WIZARD', colW / 2, bottomY + 82);
+  resetGlow();
+  ctx.restore();
+
+  // QR Code
+  const qrSize = 155;
+  const qrX = Math.round(colW / 2 - qrSize / 2);
+  const qrY = bottomY + 100;
+  ctx.save();
+  ctx.fillStyle = '#FFFFFF';
+  rr(qrX - 6, qrY - 6, qrSize + 12, qrSize + 12, 8);
+  ctx.fill();
+  ctx.restore();
+  await drawRealQRCode(ctx, qrX, qrY, qrSize, qrUrl || 'https://hhgoa.com');
+  ctx.save();
+  ctx.font = '16px serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('🌴', qrX + qrSize / 2, qrY + qrSize - 18);
+  ctx.restore();
+
+  // CENTER COLUMN — BEACH BAG (Removed as per user request)
+  ctx.save();
+  ctx.restore();
+
+  // RIGHT COLUMN — CURRENTLY SHIPPING
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(180,210,255,0.75)';
+  ctx.font = '700 14px "Space Mono", monospace';
+  ctx.fillText('— CURRENTLY SHIPPING  >>', colW * 2.5, bottomY + 24);
+  ctx.fillStyle = '#FF1B8D';
+  glow('#FF1B8D', 14);
+  ctx.font = '900 22px "Unbounded", sans-serif';
+  ctx.fillText('BUILDING', colW * 2.5, bottomY + 58);
+  ctx.fillText('THE FUTURE', colW * 2.5, bottomY + 84);
+  resetGlow();
+  // Wavy line decoration
+  ctx.strokeStyle = 'rgba(0,240,255,0.5)';
+  ctx.lineWidth = 2;
+  for (let wi = 0; wi < 2; wi++) {
+    ctx.beginPath();
+    const wy = bottomY + 102 + wi * 12;
+    for (let wx = colW * 2 + 24; wx < W - 28; wx += 18) {
+      const woff = Math.sin((wx / 18) * 0.9) * 5;
+      if (wx === colW * 2 + 24) ctx.moveTo(wx, wy + woff);
+      else ctx.lineTo(wx, wy + woff);
+    }
+    ctx.stroke();
+  }
+  // Builder ID
+  ctx.fillStyle = 'rgba(200,220,255,0.65)';
+  ctx.font = '700 13px "Space Mono", monospace';
+  ctx.fillText('BUILDER ID', colW * 2.5, bottomY + 155);
+  const bId = generateBadgeId(userData.name || '', userData.stack || '');
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = '700 15px "Space Mono", monospace';
+  ctx.fillText('#HH-GOA-' + bId.replace('HHG26-', ''), colW * 2.5, bottomY + 178);
+  // Barcode
+  ctx.fillStyle = '#FFFFFF';
+  let bx2 = colW * 2 + 30;
+  const barcodeY = bottomY + 198;
+  let seedB = 13;
+  while (bx2 < W - 30) {
+    const bw = (seedB % 6) + 2;
+    seedB = (seedB * 7 + 3) % 23;
+    ctx.fillRect(bx2, barcodeY, bw, 48);
+    bx2 += bw + (seedB % 5) + 2;
+  }
+  ctx.restore();
+
+  // 10. BOTTOM SCENE
+  ctx.save();
+  const sunY2 = H - 140;
+  const sunGrad2 = ctx.createLinearGradient(0, sunY2, 0, H - 80);
+  sunGrad2.addColorStop(0, 'rgba(255,100,20,0.15)');
+  sunGrad2.addColorStop(1, 'transparent');
+  ctx.fillStyle = sunGrad2;
+  ctx.fillRect(0, sunY2, W, H - 80 - sunY2);
+  ctx.fillStyle = '#E8C840';
+  glow('#E8C840', 22);
+  ctx.beginPath(); ctx.arc(cx, sunY2 + 22, 26, 0, Math.PI * 2); ctx.fill();
+  resetGlow();
+  ctx.restore();
+
+  // 11. FOOTER
+  ctx.save();
+  ctx.fillStyle = '#C4006A';
+  rr(cx - 300, H - 68, 600, 56, 12);
+  ctx.fill();
+  glow('#FF1B8D', 22);
+  ctx.strokeStyle = '#FF1B8D';
+  ctx.lineWidth = 3;
+  rr(cx - 300, H - 68, 600, 56, 12);
+  ctx.stroke();
+  resetGlow();
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = '900 26px "Unbounded", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('✦  #FRAMEINGOA  ✦', cx, H - 40);
+  ctx.restore();
+}
+
+// ────────────────────────────────────────────
+// Custom Vintage Goa ID Card Renderer
+// Loads retro_poster_bg.png (which is vintage_id_bg.png) and draws dynamic user details on top
+// ────────────────────────────────────────────
+async function drawVintageGoaIDCard(canvas, imageSrc, userData, cropData, qrUrl) {
+  const ctx = canvas.getContext('2d');
+  const W = 1080;
+  const H = 1440;
+  canvas.width = W;
+  canvas.height = H;
+
+  // 1. Draw Vintage Poster template background
+  const bgImg = await loadImage('/vintage_id_bg.png').catch(() => null);
+  if (bgImg) {
+    ctx.drawImage(bgImg, 0, 0, W, H);
+  } else {
+    ctx.fillStyle = '#F5E6C8';
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  const rr = (x, y, w, h, r) => {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  };
+
+  // 2. Draw User Photo inside the middle rounded rect
+  // Expanded by 8px in all directions to perfectly touch the template's inner yellow border
+  const px = 233;
+  const py = 409;
+  const pw = 610;
+  const ph = 436;
+  const pr = 35;
+
+  ctx.save();
+  rr(px, py, pw, ph, pr);
+  ctx.clip();
+
+  const img = await loadImage(imageSrc);
+
+  // Subtle professional portrait enhancement
+  ctx.filter = 'brightness(1.05) contrast(1.05) saturate(1.1)';
+
+  if (cropData) {
+    const { x: cx, y: cy, width: cw, height: ch } = cropData;
+
+    // 1. Draw a premium blurred background to seamlessly fill the wide 1.414 aspect ratio frame
+    ctx.save();
+    ctx.filter = 'blur(20px) brightness(0.6) saturate(1.2)';
+    const destRatio = pw / ph;
+    let bgSrcW = cw;
+    let bgSrcH = cw / destRatio;
+    let bgSrcY = cy + (ch - bgSrcH) / 2;
+    // Fallback clamps for background
+    if (bgSrcH > ch) bgSrcH = ch;
+    if (bgSrcY < cy) bgSrcY = cy;
+    ctx.drawImage(img, cx, bgSrcY, bgSrcW, bgSrcH, px, py, pw, ph);
+    ctx.restore();
+
+    // 2. Draw the exact cropped region (contain logic). No zoom outs, no cuts, no stretching!
+    const scale = Math.min(pw / cw, ph / ch);
+    const drawW = cw * scale;
+    const drawH = ch * scale;
+    const drawX = px + (pw - drawW) / 2;
+    const drawY = py + (ph - drawH) / 2;
+
+    // --- CREATIVE CYBER-GOA SIDE PANELS ---
+    ctx.save();
+
+    // Add a dark glassmorphism overlay on the blurred edges to make text pop
+    ctx.fillStyle = 'rgba(11, 34, 19, 0.7)'; // Dark vintage green
+    ctx.fillRect(px, py, drawX - px, ph); // Left blank
+    ctx.fillRect(drawX + drawW, py, (px + pw) - (drawX + drawW), ph); // Right blank
+
+    // Neon yellow accents
+    const accentColor = '#E8C840';
+    ctx.fillStyle = accentColor;
+    ctx.strokeStyle = accentColor;
+    ctx.lineWidth = 2;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // Center coordinates for the side sections
+    const leftMidX = px + (drawX - px) / 2;
+    const rightMidX = drawX + drawW + ((px + pw) - (drawX + drawW)) / 2;
+
+    // Tech lines framing the photo
+    ctx.beginPath();
+    ctx.moveTo(drawX - 1, py + 20);
+    ctx.lineTo(drawX - 1, py + ph - 20);
+    ctx.moveTo(drawX + drawW + 1, py + 20);
+    ctx.lineTo(drawX + drawW + 1, py + ph - 20);
+    ctx.stroke();
+
+    // Left side: HACKER text & hash marks
+    for (let i = 0; i < 6; i++) {
+      ctx.fillRect(leftMidX - 8, py + ph - 70 - i * 6, 16, 2);
+    }
+    ctx.save();
+    ctx.translate(leftMidX, py + ph / 2 - 20);
+    ctx.rotate(-Math.PI / 2);
+    ctx.font = '800 16px "Space Mono", monospace';
+    ctx.fillText('H A C K E R', 0, 0);
+    ctx.restore();
+
+    // Right side: BUILDER text & hash marks
+    for (let i = 0; i < 6; i++) {
+      ctx.fillRect(rightMidX - 8, py + 40 + i * 6, 16, 2);
+    }
+    ctx.save();
+    ctx.translate(rightMidX, py + ph / 2 + 20);
+    ctx.rotate(Math.PI / 2);
+    ctx.font = '800 16px "Space Mono", monospace';
+    ctx.fillText('B U I L D E R', 0, 0);
+    ctx.restore();
+
+    ctx.restore();
+    // --- END SIDE PANELS ---
+
+    ctx.drawImage(img, cx, cy, cw, ch, drawX, drawY, drawW, drawH);
+  } else {
+    drawCoveredImage(ctx, img, px, py, pw, ph);
+  }
+
+  ctx.filter = 'none';
+  ctx.restore();
+
+  // 3. Stylish Brush-Stroke Name Plate with 10-Character Wrapping limit
+  ctx.save();
+  const nameStr = (userData.name || 'BUILDER').toUpperCase().trim();
+
+  const nameFontSize = 42;
+  ctx.font = `900 ${nameFontSize}px "Unbounded", sans-serif`;
+  
+  // Custom wrapping: strict 10 character limit per line
+  const maxChars = 10;
+  let words = nameStr.split(' ').filter(w => w.length > 0);
+  if (words.length === 0) words = ['BUILDER'];
+  
+  let tempLines = [];
+  let currentLine = words[0];
+
+  for (let i = 1; i < words.length; i++) {
+    const word = words[i];
+    if ((currentLine + " " + word).length <= maxChars) {
+      currentLine += " " + word;
+    } else {
+      tempLines.push(currentLine);
+      currentLine = word;
+    }
+  }
+  tempLines.push(currentLine);
+
+  let lines = [];
+  for (let line of tempLines) {
+    if (line.length > maxChars) {
+      // Forcefully chunk words that are longer than 7 characters
+      let temp = line;
+      while (temp.length > maxChars) {
+        lines.push(temp.substring(0, maxChars));
+        temp = temp.substring(maxChars);
+      }
+      if (temp.length > 0) lines.push(temp);
+    } else {
+      lines.push(line);
+    }
+  }
+
+  let maxLineWidth = Math.max(...lines.map(l => ctx.measureText(l).width));
+  const plateW = Math.max(maxLineWidth + 120, 260); // Minimum 260px width
+  const plateH = 36 + (lines.length * nameFontSize); // Dynamic height based on lines
+  const plateX = (W / 2) - (plateW / 2);
+  const plateY = 928 - (plateH / 2);
+
+  const brushColor = '#0F4C5C'; // The dark teal from the screenshot
+
+  ctx.fillStyle = brushColor;
+  ctx.strokeStyle = brushColor;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  // Base solid rect
+  ctx.fillRect(plateX, plateY + 15, plateW, plateH - 30);
+
+  // Frayed horizontal brush strokes to simulate a rough paint swipe
+  const numStrokes = 70 + (lines.length * 20); // More strokes if taller
+  for (let i = 0; i < numStrokes; i++) {
+    let cy = plateY + (i / numStrokes) * plateH + (Math.random() - 0.5) * 4;
+    let extLeft = Math.random() * 40;
+    let extRight = Math.random() * 40;
+    
+    if (i % 6 === 0) {
+      extLeft += 35;
+      extRight += 35;
+    }
+
+    ctx.lineWidth = 2 + Math.random() * 7;
+    ctx.beginPath();
+    ctx.moveTo(plateX - extLeft, cy);
+    ctx.lineTo(plateX + plateW + extRight, cy + (Math.random() - 0.5) * 6);
+    ctx.stroke();
+  }
+
+  // Draw some yellow/orange accent splatters
+  ctx.fillStyle = '#E8A340';
+  ctx.beginPath();
+  ctx.arc(plateX + plateW - 30, plateY + 15, 3.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(plateX + plateW - 20, plateY + 18, 2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(plateX + plateW - 38, plateY + 12, 1.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Draw the actual name text
+  ctx.fillStyle = '#FFFFFF';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  
+  // Center all the lines vertically
+  const totalTextHeight = lines.length * nameFontSize;
+  let startY = 928 - (totalTextHeight / 2) + (nameFontSize / 2);
+
+  for(let i=0; i<lines.length; i++) {
+    ctx.fillText(lines[i], W / 2, startY + (i * nameFontSize));
+  }
+  
+  ctx.restore();
+
+  // 4. Role/Stack inside yellow pill
+  ctx.save();
+  const roleStr = (userData.stack || 'BUILDER').toUpperCase();
+  ctx.fillStyle = '#0D3B1E';
+
+  let roleFontSize = 20;
+  ctx.font = `800 ${roleFontSize}px "Unbounded", sans-serif`;
+  let roleWidth = ctx.measureText(roleStr).width;
+  while (roleWidth > 420 && roleFontSize > 12) {
+    roleFontSize -= 2;
+    ctx.font = `800 ${roleFontSize}px "Unbounded", sans-serif`;
+    roleWidth = ctx.measureText(roleStr).width;
+  }
+
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(roleStr, W / 2, 1025); // Centered in yellow initials pill
+  ctx.restore();
+
+  // 5. Draw QR code perfectly centered in the 'SCAN QR' box
+  const qrSz = 210; // Maximize size to fully fill the box
+  
+  // The 'SCAN QR' box center is approx X=245, Y=1205
+  const qrCenter = 245;
+  const qrCenterY = 1205; // Shifted down to center vertically inside the taller box
+  
+  const qrX = Math.round(qrCenter - qrSz / 2);
+  const qrY = Math.round(qrCenterY - qrSz / 2); 
+  
+  await drawRealQRCode(ctx, qrX, qrY, qrSz, qrUrl || 'https://hhgoa.com');
+
+  // 5.5 Fill in the middle "BEACH BAG" dotted lines (Removed as per request)
+  
+  // 6. Draw Barcode and ID perfectly centered in the 'BAR CODE' box
+  const bId = generateBadgeId(userData.name || '', userData.stack || '');
+  let barcodeValue = 'HH-GOA-' + bId.replace('HHG26-', '');
+  
+  // If the user provided a team name, encode both into the barcode!
+  if (userData.team && userData.team.trim() !== '') {
+    barcodeValue = userData.team.toUpperCase().trim() + ' | ' + barcodeValue;
+  }
+
+  ctx.save();
+  ctx.fillStyle = '#000000'; // Changed to black as requested
+  ctx.font = '700 22px "Space Mono", monospace';
+  ctx.textAlign = 'center'; // Center the text over the barcode
+  
+  // The 'BAR CODE' box center is around 610
+  const barCenter = 610;
+  const barW = 360; // Target width
+  const barStart = barCenter - (barW / 2); 
+  const barcodeHeight = 65;
+  const barcodeY = 1130; 
+  
+  // Create an offscreen canvas for the REAL barcode
+  const barcodeCanvas = document.createElement('canvas');
+  try {
+    JsBarcode(barcodeCanvas, barcodeValue, {
+      format: "CODE128",
+      displayValue: false, // We draw the text manually below
+      lineColor: "#000000",
+      background: "transparent",
+      width: 4, 
+      height: barcodeHeight,
+      margin: 0
+    });
+    
+    // Draw the real barcode stretched to our desired width
+    ctx.drawImage(
+      barcodeCanvas, 
+      0, 0, barcodeCanvas.width, barcodeCanvas.height,
+      barStart, barcodeY, barW, barcodeHeight
+    );
+  } catch(e) {
+    console.error("Barcode generation failed", e);
+  }
+
+  // Builder ID text (placed just below the barcode) - ONLY show the ID visually to prevent text overflow!
+  const displayId = 'HH-GOA-' + bId.replace('HHG26-', '');
+  ctx.fillText('#' + displayId, barCenter, 1220);
+
+  // Conditionally render Team Name above the barcode if provided
+  if (userData.team && userData.team.trim() !== '') {
+    ctx.fillStyle = '#000000'; // Changed to black as well
+    ctx.font = '700 16px "Space Mono", monospace';
+    ctx.fillText('TEAM: ' + userData.team.toUpperCase(), barCenter, 1115);
+  }
+  ctx.restore();
+
+  // 7. Draw ID Lanyard Hole at the top
+  ctx.save();
+  const holeW = 200;
+  const holeH = 40;
+  const holeX = (W / 2) - (holeW / 2);
+  const holeY = 40; // Spacing from top edge
+  const holeR = 20;
+
+  ctx.beginPath();
+  ctx.moveTo(holeX + holeR, holeY);
+  ctx.lineTo(holeX + holeW - holeR, holeY);
+  ctx.quadraticCurveTo(holeX + holeW, holeY, holeX + holeW, holeY + holeR);
+  ctx.lineTo(holeX + holeW, holeY + holeH - holeR);
+  ctx.quadraticCurveTo(holeX + holeW, holeY + holeH, holeX + holeW - holeR, holeY + holeH);
+  ctx.lineTo(holeX + holeR, holeY + holeH);
+  ctx.quadraticCurveTo(holeX, holeY + holeH, holeX, holeY + holeH - holeR);
+  ctx.lineTo(holeX, holeY + holeR);
+  ctx.quadraticCurveTo(holeX, holeY, holeX + holeR, holeY);
+  ctx.closePath();
+
+  // Punch out a transparent hole
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.fill();
+
+  // Draw a subtle 3D rim around the hole
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  
+  // Inner highlight
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.restore();
 }
