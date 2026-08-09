@@ -11,7 +11,8 @@ const STACKS = [
 export default function Step4Style({ format, selected, onSelect, userData, imageSrc, cropData, onUserDataChange, onNext, onBack }) {
   const autoTitle = generateBuilderTitle(userData.name || 'Builder', userData.stack || '');
 
-  const canvasRef = useRef(null);
+  const desktopCanvasRef = useRef(null); // portaled to left page on desktop
+  const mobileCanvasRef = useRef(null);  // inline preview on mobile
   const [leftPageNode, setLeftPageNode] = useState(null);
   const [generating, setGenerating] = useState(false);
 
@@ -23,17 +24,24 @@ export default function Step4Style({ format, selected, onSelect, userData, image
   }, []);
 
   useEffect(() => {
-    if (!canvasRef.current || !imageSrc) return;
+    if (!imageSrc) return;
     setGenerating(true);
-    const generatePreview = async () => {
+    const drawToCanvas = async (canvas) => {
+      if (!canvas) return;
       if (format === 'id') {
-        await drawIDCard(canvasRef.current, imageSrc, userData, selected, cropData?.crop, null);
+        await drawIDCard(canvas, imageSrc, userData, selected, cropData?.crop, null);
       } else {
-        await drawPFPFrame(canvasRef.current, imageSrc, selected, cropData?.crop, cropData?.shape || 'circle');
+        await drawPFPFrame(canvas, imageSrc, selected, cropData?.crop, cropData?.shape || 'circle');
       }
+    };
+    const run = async () => {
+      await Promise.all([
+        drawToCanvas(desktopCanvasRef.current),
+        drawToCanvas(mobileCanvasRef.current),
+      ]);
       setGenerating(false);
     };
-    const t = setTimeout(generatePreview, 100);
+    const t = setTimeout(run, 100);
     return () => clearTimeout(t);
   }, [format, imageSrc, userData, selected, cropData, leftPageNode]);
 
@@ -51,7 +59,7 @@ export default function Step4Style({ format, selected, onSelect, userData, image
             <div className="preview-lbl" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)', marginBottom: '10px' }}>Live Preview</div>
             <div className="preview-frame emerge-animation" style={{ position: 'relative', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.3)' }}>
               <canvas
-                ref={canvasRef}
+                ref={desktopCanvasRef}
                 style={{
                   display: 'block',
                   width: '100%',
@@ -90,6 +98,32 @@ export default function Step4Style({ format, selected, onSelect, userData, image
             <div className="frame-name">{fs.name}</div>
           </div>
         ))}
+      </div>
+
+      {/* ── Mobile-only inline live preview ── */}
+      <div className="hhg-mobile-only" style={{ margin: '18px auto 0', maxWidth: 320, width: '100%' }}>
+        <div style={{
+          textAlign: 'center',
+          fontFamily: "'Space Mono', monospace",
+          fontSize: 10,
+          letterSpacing: '0.15em',
+          color: 'rgba(255,255,255,0.5)',
+          textTransform: 'uppercase',
+          marginBottom: 10,
+        }}>
+          ◈ Live Preview
+        </div>
+        <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', boxShadow: '0 0 0 2px rgba(232,200,64,0.4), 0 16px 40px rgba(0,0,0,0.4)' }}>
+          <canvas
+            ref={mobileCanvasRef}
+            style={{ display: 'block', width: '100%', height: 'auto' }}
+          />
+          {generating && (
+            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#E8C840', fontFamily: "'Space Mono', monospace", fontSize: 11, fontWeight: 700, letterSpacing: '0.1em' }}>
+              RENDERING…
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ID card fields */}
