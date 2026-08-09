@@ -9,6 +9,7 @@ import IntroScreen from './components/IntroScreen';
 import HackerHome from './components/HackerHome';
 import ErrorTerminal from './components/ErrorTerminal';
 import EchoText from './components/EchoText';
+import { motion, AnimatePresence } from 'framer-motion';
 import './index.css';
 
 // ── SW for offline (Disable in development to prevent aggressive caching) ──
@@ -375,9 +376,6 @@ export default function App() {
               className="hhg-scroll-btn"
               onClick={() => {
                 setBookVisible(true);
-                setTimeout(() => {
-                  bookRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 80);
               }}
               aria-label="Scroll down to get started"
             >
@@ -394,87 +392,134 @@ export default function App() {
           </div>
         </div>
 
-        {/* Interactive Book Flow — only rendered after GET STARTED is clicked */}
-        {bookVisible && (
-          <main
-            ref={bookRef}
-            className="hhg-content"
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              animation: 'bookReveal 0.6s ease forwards',
-            }}
-          >
-          <InteractiveBook step={step} onOpen={() => setStep(1)} onClose={() => setStep(0)}>
-            {/* Page 1: UPLOAD */}
-            <Step1Upload
-              imageSrc={imageSrc}
-              onNext={(src) => {
-                setImageSrc(src);
-                setStep(2);
+        {/* Interactive Book Flow — cinematic modal overlay with Framer Motion */}
+        <AnimatePresence>
+          {bookVisible && (
+            <motion.div
+              ref={bookRef}
+              className="hhg-book-backdrop-overlay"
+              initial={{ opacity: 0, backgroundColor: 'rgba(5, 20, 10, 0)' }}
+              animate={{ opacity: 1, backgroundColor: 'rgba(5, 20, 10, 0.82)' }}
+              exit={{ opacity: 0, backgroundColor: 'rgba(5, 20, 10, 0)' }}
+              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100vw',
+                height: '100vh',
+                zIndex: 9990,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                overflow: 'hidden',
               }}
-              onReset={reset}
-            />
-
-            {/* Page 2: ADJUST */}
-            {imageSrc ? (
-              <Step2Adjust
-                imageSrc={imageSrc}
-                onNext={(data) => {
-                  setCropData(data);
-                  setStep(3);
+            >
+              {/* Blur backdrop animation */}
+              <motion.div
+                initial={{ backdropFilter: 'blur(0px)' }}
+                animate={{ backdropFilter: 'blur(12px)' }}
+                exit={{ backdropFilter: 'blur(0px)' }}
+                transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  pointerEvents: 'none',
                 }}
-                onBack={() => setStep(1)}
               />
-            ) : (
-              <div style={{ padding: '20px' }}>Please upload an image first.</div>
-            )}
 
-            {/* Page 3: CHOOSE FORMAT */}
-            <Step3Choose
-              selected={format}
-              onSelect={(fmt) => {
-                setFormat(fmt);
-              }}
-              onNext={() => {
-                setStep(4);
-              }}
-              onBack={() => setStep(2)}
-            />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.68, rotateX: 15, rotateY: -15, y: 70 }}
+                animate={{ opacity: 1, scale: 1, rotateX: 0, rotateY: 0, y: 0 }}
+                exit={{ opacity: 0, scale: 0.78, rotateX: -12, rotateY: 12, y: 50 }}
+                transition={{
+                  type: 'spring',
+                  damping: 25,
+                  stiffness: 110,
+                  mass: 1
+                }}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  transformStyle: 'preserve-3d',
+                  perspective: '2000px',
+                }}
+              >
+                <InteractiveBook step={step} onOpen={() => setStep(1)} onClose={() => { setStep(0); setBookVisible(false); }}>
+                  {/* Page 1: UPLOAD */}
+                  <Step1Upload
+                    imageSrc={imageSrc}
+                    onNext={(src) => {
+                      setImageSrc(src);
+                      setStep(2);
+                    }}
+                    onReset={reset}
+                  />
 
-            {/* Page 4: FRAME STYLE */}
-            <Step4Style
-              format={format}
-              selected={frameStyle}
-              onSelect={setFrameStyle}
-              userData={userData}
-              imageSrc={imageSrc}
-              cropData={cropData}
-              onUserDataChange={setUserData}
-              onNext={() => {
-                setStep(5);
-              }}
-              onBack={() => setStep(3)}
-            />
+                  {/* Page 2: ADJUST */}
+                  {imageSrc ? (
+                    <Step2Adjust
+                      imageSrc={imageSrc}
+                      onNext={(data) => {
+                        setCropData(data);
+                        setStep(3);
+                      }}
+                      onBack={() => setStep(1)}
+                    />
+                  ) : (
+                    <div style={{ padding: '20px' }}>Please upload an image first.</div>
+                  )}
 
-            {/* Page 5: GENERATE & SHARE */}
-            {imageSrc ? (
-              <Step5Generate
-                format={format}
-                frameStyle={frameStyle}
-                cropData={cropData}
-                imageSrc={imageSrc}
-                userData={userData}
-                onReset={reset}
-                onBack={() => setStep(4)}
-                inBook={true}
-              />
-            ) : (
-              <div style={{ padding: '20px' }}>Missing data.</div>
-            )}
-          </InteractiveBook>
-        </main>
-        )}
+                  {/* Page 3: CHOOSE FORMAT */}
+                  <Step3Choose
+                    selected={format}
+                    onSelect={(fmt) => {
+                      setFormat(fmt);
+                    }}
+                    onNext={() => {
+                      setStep(4);
+                    }}
+                    onBack={() => setStep(2)}
+                  />
+
+                  {/* Page 4: FRAME STYLE */}
+                  <Step4Style
+                    format={format}
+                    selected={frameStyle}
+                    onSelect={setFrameStyle}
+                    userData={userData}
+                    imageSrc={imageSrc}
+                    cropData={cropData}
+                    onUserDataChange={setUserData}
+                    onNext={() => {
+                      setStep(5);
+                    }}
+                    onBack={() => setStep(3)}
+                  />
+
+                  {/* Page 5: GENERATE & SHARE */}
+                  {imageSrc ? (
+                    <Step5Generate
+                      format={format}
+                      frameStyle={frameStyle}
+                      cropData={cropData}
+                      imageSrc={imageSrc}
+                      userData={userData}
+                      onReset={reset}
+                      onBack={() => setStep(4)}
+                      inBook={true}
+                    />
+                  ) : (
+                    <div style={{ padding: '20px' }}>Missing data.</div>
+                  )}
+                </InteractiveBook>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <footer className="hhg-footer">
           <span>#FrameInGoa</span> · HH Goa 2026 · GOA, INDIA · 28–31 OCT 2026 · <span>2:47 PM STUDIO</span>
