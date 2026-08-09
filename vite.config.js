@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   assetsInclude: ['**/*.glb'],
   build: {
-    minify: 'esbuild',
+    minify: 'oxc',
     cssCodeSplit: true,
     assetsInlineLimit: 4096,
     target: 'es2020',
