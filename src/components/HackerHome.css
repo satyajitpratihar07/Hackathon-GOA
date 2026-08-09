@@ -1,0 +1,149 @@
+/* HackerRoom Styles */
+
+.hhg-hacker-room-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  font-family: 'Courier New', Courier, monospace;
+}
+
+/* Room Container */
+.hhg-hr-container {
+  position: relative;
+  width: 1000px;
+  height: 700px;
+  max-width: 95vw;
+  max-height: 90vh;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255,255,255,0.1);
+}
+
+/* SVG Scene */
+.hhg-hr-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* Close button */
+.hhg-hr-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid #FF3333;
+  color: #FF3333;
+  padding: 8px 16px;
+  font-family: monospace;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+.hhg-hr-close:hover {
+  background: #FF3333;
+  color: #000;
+}
+
+/* Monitors HTML Overlays */
+.hhg-hr-monitor {
+  position: absolute;
+  z-index: 2;
+  background: #050505;
+  box-sizing: border-box;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.hhg-hr-monitor-left {
+  /* Positioned to match the left SVG monitor */
+  left: 21%;
+  top: 31%;
+  width: 27%;
+  height: 23%;
+  border: 2px solid #111;
+  border-radius: 2px;
+}
+
+.hhg-hr-monitor-right {
+  /* Positioned to match the right SVG monitor */
+  left: 49%;
+  top: 31%;
+  width: 27%;
+  height: 23%;
+  border: 2px solid #111;
+  border-radius: 2px;
+}
+
+/* Monitor Content Styles */
+.hhg-hr-monitor-header {
+  background: #111;
+  color: #00FF88;
+  padding: 2px 5px;
+  font-size: 8px;
+  border-bottom: 1px solid #222;
+  font-weight: bold;
+}
+
+.hhg-hr-monitor-body {
+  flex: 1;
+  padding: 4px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.hhg-hr-log-line {
+  font-size: 7px;
+  line-height: 1.3;
+  word-break: break-all;
+  opacity: 0.8;
+}
+
+.hhg-hr-log-line.system { color: #00FF88; }
+.hhg-hr-log-line.command { color: #fff; font-weight: bold; }
+.hhg-hr-log-line.info { color: #64748B; }
+.hhg-hr-log-line.success { color: #10B981; }
+.hhg-hr-log-line.warning { color: #E8C840; }
+.hhg-hr-log-line.error { color: #FF3333; }
+
+.hhg-hr-input-wrapper {
+  display: flex;
+  margin-top: auto;
+  border-top: 1px solid #222;
+  padding-top: 2px;
+}
+
+.hhg-hr-prompt {
+  color: #00FF88;
+  font-size: 7px;
+  margin-right: 4px;
+}
+
+.hhg-hr-input {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-family: inherit;
+  font-size: 7px;
+  flex: 1;
+  outline: none;
+}
+
+/* Breach logs */
+.hhg-hr-breach-line {
+  font-size: 8px;
+  color: #FF3333;
+  margin-bottom: 2px;
+}

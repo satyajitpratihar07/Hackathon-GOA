@@ -1,0 +1,360 @@
+/* ErrorTerminal CSS - Transformed into Cybersecurity Dashboard */
+
+.hhg-err-terminal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: rgba(10, 11, 14, 0.95);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', -apple-system, sans-serif;
+  color: #fff;
+}
+
+/* Dashboard Container */
+.hhg-dash-container {
+  width: 95vw;
+  height: 90vh;
+  max-width: 1600px;
+  background: #0A0B0E;
+  border: 1px solid #1E293B;
+  border-radius: 12px;
+  display: flex;
+  overflow: hidden;
+  box-shadow: 0 0 50px rgba(0, 255, 136, 0.1);
+  position: relative;
+}
+
+/* Sidebar */
+.hhg-dash-sidebar {
+  width: 60px;
+  background: #060709;
+  border-right: 1px solid #1E293B;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0;
+  gap: 20px;
+}
+
+.hhg-dash-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #00FF88;
+  border: 2px solid #00FF88;
+  box-shadow: 0 0 10px rgba(0,255,136,0.5);
+  margin-bottom: auto;
+}
+
+.hhg-dash-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748B;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.hhg-dash-icon:hover, .hhg-dash-icon.active {
+  color: #00FF88;
+  background: rgba(0,255,136,0.1);
+}
+
+/* Main Content Area */
+.hhg-dash-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  gap: 20px;
+  overflow-y: auto;
+}
+
+/* Header */
+.hhg-dash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hhg-dash-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1px;
+}
+
+.hhg-dash-search {
+  background: #111827;
+  border: 1px solid #1E293B;
+  border-radius: 20px;
+  padding: 8px 16px;
+  color: #94A3B8;
+  font-size: 13px;
+  width: 250px;
+  outline: none;
+}
+
+/* Grid Layout */
+.hhg-dash-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto auto;
+  gap: 20px;
+  flex: 1;
+}
+
+/* Widget Panels */
+.hhg-dash-panel {
+  background: #0F1219;
+  border: 1px solid #1E293B;
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.hhg-dash-panel-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #94A3B8;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hhg-dash-panel-title::before {
+  content: '';
+  display: block;
+  width: 6px;
+  height: 6px;
+  background: #00FF88;
+  border-radius: 50%;
+  box-shadow: 0 0 5px #00FF88;
+}
+
+/* Map Widget (Spans 1 row, 1 col) */
+.hhg-dash-map-widget {
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
+  min-height: 250px;
+}
+
+/* Traffic Widget (Spans 1 row, 1 col) */
+.hhg-dash-traffic-widget {
+  grid-column: 2 / 3;
+  grid-row: 1 / 2;
+}
+
+/* Progress / Gauges Widget */
+.hhg-dash-gauges-widget {
+  grid-column: 1 / 2;
+  grid-row: 2 / 3;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+}
+
+/* Terminal Widget */
+.hhg-dash-term-widget {
+  grid-column: 2 / 3;
+  grid-row: 2 / 4;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+/* Map specifics */
+.hhg-map-svg {
+  width: 100%;
+  height: 100%;
+  opacity: 0.8;
+}
+
+.hhg-map-dot {
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0% { r: 2; opacity: 1; stroke-width: 0; stroke: #00FF88; }
+  100% { r: 15; opacity: 0; stroke-width: 2; stroke: #00FF88; }
+}
+
+/* Traffic Chart */
+.hhg-traffic-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 100%;
+  padding-bottom: 10px;
+}
+
+.hhg-traffic-bar {
+  flex: 1;
+  background: linear-gradient(to top, rgba(0,255,136,0.1), #00FF88);
+  border-radius: 2px 2px 0 0;
+  transition: height 0.5s ease-in-out;
+  min-height: 5%;
+}
+
+/* Circular Gauge */
+.hhg-gauge {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.hhg-gauge-svg {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+}
+
+.hhg-gauge-value {
+  font-size: 20px;
+  font-weight: bold;
+  color: #00FF88;
+}
+
+.hhg-gauge-label {
+  font-size: 10px;
+  color: #64748B;
+  margin-top: 4px;
+}
+
+/* Linear Progress */
+.hhg-progress-item {
+  margin-bottom: 15px;
+}
+
+.hhg-progress-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #94A3B8;
+  margin-bottom: 5px;
+}
+
+.hhg-progress-track {
+  height: 4px;
+  background: #1E293B;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.hhg-progress-fill {
+  height: 100%;
+  background: #00FF88;
+  box-shadow: 0 0 10px #00FF88;
+  transition: width 1s ease-in-out;
+}
+
+/* Terminal Lines */
+.hhg-dash-term-output {
+  flex: 1;
+  overflow-y: auto;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.hhg-dash-log.sys { color: #00FF88; }
+.hhg-dash-log.err { color: #FF3333; }
+.hhg-dash-log.solve { color: #10B981; }
+
+.hhg-dash-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: transparent;
+  border: 1px solid #1E293B;
+  color: #94A3B8;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.hhg-dash-close:hover {
+  background: #FF3333;
+  color: #fff;
+  border-color: #FF3333;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .hhg-dash-container {
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    border-radius: 0;
+    border: none;
+  }
+  
+  .hhg-dash-sidebar {
+    width: 100%;
+    flex-direction: row;
+    height: auto;
+    padding: 10px 20px;
+    border-right: none;
+    border-bottom: 1px solid #1E293B;
+  }
+  
+  .hhg-dash-avatar {
+    margin-bottom: 0;
+    margin-right: auto;
+  }
+  
+  .hhg-dash-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+  
+  .hhg-dash-search {
+    width: 100%;
+  }
+
+  .hhg-dash-close {
+    position: static;
+    margin-top: 10px;
+  }
+  
+  .hhg-dash-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    gap: 15px;
+  }
+  
+  .hhg-dash-map-widget,
+  .hhg-dash-traffic-widget,
+  .hhg-dash-gauges-widget,
+  .hhg-dash-term-widget {
+    grid-column: 1 / -1;
+    grid-row: auto;
+    min-height: 200px;
+  }
+  
+  .hhg-dash-gauges-widget {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .hhg-dash-gauges-widget > div {
+    width: 100%;
+    padding-left: 0 !important;
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "HH Goa 2026 Frame Generator",
+  "short_name": "FrameInGoa",
+  "description": "Generate your HH Goa 2026 branded frame or Builder ID card",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0D3B1E",
+  "theme_color": "#0D3B1E",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

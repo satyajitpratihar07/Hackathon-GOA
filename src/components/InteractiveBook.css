@@ -1,0 +1,838 @@
+.hhg-book-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  perspective: 2000px;
+  width: 100%;
+  padding: 40px 0;
+  margin-top: 40px;
+  margin-bottom: 80px;
+  transition: background-color 0.5s ease;
+}
+
+/* Modal Overlay Mode */
+.hhg-book-container.is-fixed-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  z-index: 9999;
+  background-color: rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(10px);
+}
+
+.hhg-book-close-btn {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 10000; /* Above the book */
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+  padding-bottom: 4px; /* Optical alignment for &times; */
+}
+
+.hhg-book-close-btn:hover {
+  background: #e11d48;
+  border-color: #e11d48;
+  transform: rotate(90deg);
+}
+
+.hhg-book {
+  position: relative;
+  width: 90vw;
+  max-width: 480px;
+  height: 560px;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* When the book is closed, it's centered as a single page. 
+   When open, we shift it right by exactly 50% of its width. 
+   Since the hinge is on the left, shifting 50% right puts the hinge perfectly in the center of the screen, centering the full 2-page spread! */
+.hhg-book.is-open {
+  transform: translateX(50%);
+}
+
+@media (max-width: 960px) {
+  /* On smaller screens, the 2-page spread is too wide. We scale it down so the full spread fits on screen, keeping it perfectly centered. */
+  .hhg-book.is-open {
+    transform: translateX(50%) scale(0.8);
+  }
+}
+@media (max-width: 600px) {
+  /* On mobile, showing a full 2-page spread is too tiny. 
+     Instead, we just keep the book centered so the right page (the active form) 
+     fills the screen nicely, and the left page (cover) swings out of view. */
+  .hhg-book.is-open {
+    transform: translateX(0) scale(1);
+  }
+}
+
+.hhg-book-page {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  border-radius: 4px 16px 16px 4px;
+  /* Add a tiny bit of depth to pages */
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Hardbound Spine */
+.hhg-book-spine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 64px; /* Matches max translateZ thickness of pages + covers */
+  height: 100%;
+  background: linear-gradient(to right, #0a0a12, #1e1b4b, #0a0a12);
+  transform-origin: left center;
+  transform: translateZ(64px) rotateY(-90deg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 20;
+}
+
+.spine-text {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-family: 'Space Mono', monospace;
+  font-size: 14px;
+  letter-spacing: 4px;
+  color: rgba(255, 255, 255, 0.5);
+  transform: rotate(180deg);
+}
+
+/* Page faces */
+.hhg-book-page-front,
+.hhg-book-page-back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 4px 16px 16px 4px;
+  overflow: hidden;
+}
+
+.hhg-book-page-front {
+  z-index: 2;
+}
+
+.hhg-book-page-back {
+  transform: rotateY(180deg);
+  border-radius: 16px 4px 4px 16px;
+  z-index: 1;
+  pointer-events: none; /* Prevent invisible backface from blocking clicks on the front */
+}
+
+/* Flipped State */
+.hhg-book-page.is-flipped {
+  transform: rotateY(-180deg);
+}
+.hhg-book-page.is-flipped .hhg-book-page-back {
+  pointer-events: auto; /* Re-enable clicks when the back is facing the user */
+}
+.hhg-book-page.is-flipped .hhg-book-page-front {
+  pointer-events: none; /* Disable clicks on the front when it's hidden */
+}
+
+/* Cover Styling */
+.hhg-book-front-cover .cover-front,
+.hhg-book-front-cover .cover-back,
+.hhg-book-back-cover .hhg-book-page-front,
+.hhg-book-back-cover .hhg-book-page-back {
+  background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+  border: 3px solid #4c1d95;
+  box-shadow: inset 10px 0 30px rgba(0,0,0,0.8), 5px 10px 25px rgba(0,0,0,0.5);
+}
+
+.hhg-book-front-cover .cover-back,
+.hhg-book-back-cover .hhg-book-page-front {
+  background: #0f172a;
+  border-left: 20px solid #1e1b4b;
+}
+
+/* Cover front details */
+.cover-front {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  cursor: pointer;
+  transition: filter 0.3s ease;
+}
+
+.cover-front:hover {
+  filter: brightness(1.2);
+}
+
+.hhg-book-front-cover .cover-front {
+  background: url('/hacker_house_cover.png') center/cover no-repeat !important;
+  border: none !important;
+  box-shadow: inset 10px 0 50px rgba(0,0,0,0.9), 5px 10px 25px rgba(0,0,0,0.5) !important;
+  padding: 0;
+}
+
+.cover-click-hint {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.7);
+  color: #fff;
+  padding: 10px 24px;
+  border-radius: 30px;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 3px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  animation: bounceHint 2s infinite ease-in-out;
+  pointer-events: none; /* Let clicks pass through to the cover */
+}
+
+@keyframes bounceHint {
+  0%, 100% { transform: translate(-50%, 0); }
+  50% { transform: translate(-50%, -8px); }
+}
+
+/* Inside Cover (Left Page) Content */
+.cover-back-content {
+  padding: 40px 30px;
+  color: #94a3b8;
+  font-family: 'Space Mono', monospace;
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  background: linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.9)), url('/inside_cover.png') center/cover no-repeat;
+}
+
+.cover-back-content h2 {
+  font-family: 'Unbounded', sans-serif;
+  color: #f8fafc;
+  font-size: 1.5rem;
+  margin: 0 0 20px 0;
+  line-height: 1.2;
+}
+
+.cover-back-content .divider {
+  width: 40px;
+  height: 3px;
+  background: #00f0ff;
+  margin-bottom: 30px;
+  box-shadow: 0 0 10px rgba(0,240,255,0.5);
+}
+
+.cover-back-content .manifesto {
+  font-size: 12px;
+  line-height: 1.6;
+  margin-bottom: 40px;
+  color: #cbd5e1;
+}
+
+.hhg-clock-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  margin-top: 10px;
+}
+
+.hhg-pendulum-clock {
+  width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(135deg, #3e2723, #1b0000);
+  border-radius: 12px 12px 6px 6px;
+  padding: 15px;
+  border: 3px solid #5d4037;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 15px rgba(0,0,0,0.5);
+  position: relative;
+}
+
+.hhg-pendulum-clock .clock-top {
+  width: 100px;
+  height: 100px;
+  background: #fdf5e6;
+  border-radius: 50%;
+  border: 6px solid #d4af37;
+  position: relative;
+  box-shadow: inset 0 0 8px rgba(0,0,0,0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hhg-pendulum-clock .clock-face {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.clock-number {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  font-weight: bold;
+  color: #333;
+}
+
+.clock-number span {
+  display: inline-block;
+  padding-top: 4px;
+}
+
+.hhg-pendulum-clock .hand {
+  position: absolute;
+  bottom: 50%;
+  left: 50%;
+  transform-origin: bottom center;
+  background: #000;
+  border-radius: 4px;
+}
+
+.hhg-pendulum-clock .hour-hand {
+  width: 4px;
+  height: 25px;
+  margin-left: -2px;
+}
+
+.hhg-pendulum-clock .minute-hand {
+  width: 3px;
+  height: 35px;
+  margin-left: -1.5px;
+}
+
+.hhg-pendulum-clock .second-hand {
+  width: 2px;
+  height: 40px;
+  margin-left: -1px;
+  background: #d32f2f;
+}
+
+.hhg-pendulum-clock .center-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  background: #000;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid #d4af37;
+}
+
+.hhg-pendulum-clock .clock-bottom {
+  width: 80px;
+  height: 90px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 3px solid #5d4037;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hhg-pendulum-clock .pendulum {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 30px;
+  height: 80px;
+  margin-left: -15px;
+  transform-origin: top center;
+  animation: swing 2s infinite ease-in-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hhg-pendulum-clock .pendulum-rod {
+  width: 3px;
+  height: 50px;
+  background: #d4af37;
+}
+
+.hhg-pendulum-clock .pendulum-bob {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #ffdf73, #b8860b);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.5);
+  margin-top: -2px;
+}
+
+@keyframes swing {
+  0% { transform: rotate(15deg); }
+  50% { transform: rotate(-15deg); }
+  100% { transform: rotate(15deg); }
+}
+
+.hhg-stylish-digital-clock {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: inline-block;
+  box-shadow: 0 4px 20px rgba(0, 240, 255, 0.1);
+  backdrop-filter: blur(8px);
+}
+
+.hhg-stylish-digital-clock .clock-time {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 2rem;
+  font-weight: 900;
+  color: #fff;
+  display: flex;
+  align-items: baseline;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+  letter-spacing: 2px;
+}
+
+.hhg-stylish-digital-clock .clock-time .colon {
+  color: #00f0ff;
+  animation: blink 1s infinite;
+  margin: 0 4px;
+}
+
+.hhg-stylish-digital-clock .clock-time .seconds {
+  font-size: 1rem;
+  color: #6ee7b7;
+  margin-left: 8px;
+  font-family: 'Space Mono', monospace;
+}
+
+.hhg-stylish-digital-clock .clock-date {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  color: #94a3b8;
+  margin-top: 8px;
+  letter-spacing: 2px;
+  text-align: left;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.cover-back-content .watermark {
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 6rem;
+  font-weight: 900;
+  color: rgba(255,255,255,0.03);
+  pointer-events: none;
+}
+
+/* Page Content Styling */
+.hhg-book-content-page {
+  width: 98% !important;
+  height: 96% !important;
+  top: 2% !important;
+  left: 0 !important;
+}
+
+.hhg-book-content-page .hhg-book-page-front {
+  background-color: #e6d3a8;
+  background-image: url('/paper_texture.png');
+  background-size: cover;
+  background-position: center;
+  border-left: 4px solid rgba(0,0,0,0.1);
+  box-shadow: inset 15px 0 30px rgba(0,0,0,0.4);
+}
+
+.hhg-book-content-page .hhg-book-page-back {
+  background-color: #e6d3a8;
+  background-image: url('/paper_texture.png');
+  background-size: cover;
+  background-position: center;
+  border-right: 4px solid rgba(0,0,0,0.1);
+  box-shadow: inset -15px 0 30px rgba(0,0,0,0.4);
+}
+
+.hhg-book-page-content {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 15px;
+}
+
+/* Hide scrollbar for clean pages */
+.hhg-book-page-content::-webkit-scrollbar {
+  width: 4px;
+}
+.hhg-book-page-content::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.1);
+  border-radius: 10px;
+}
+
+.hhg-logo-watermark {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 8rem;
+  font-weight: 900;
+  color: #e2e8f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  opacity: 0.5;
+}
+
+/* Make sure the existing cards inside the book look like ink on paper */
+.hhg-book-page-content .hhg-step-card,
+.hhg-book-page-content .hhg-brutalist-card {
+  box-shadow: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #0f172a !important;
+  margin-top: 0;
+  padding: 0;
+}
+
+/* Strip backgrounds from upload zones inside the book */
+.hhg-book-page-content .hhg-upload-zone-brutalist {
+  background: transparent !important;
+  border: 2px dashed #94a3b8 !important;
+  box-shadow: none !important;
+}
+.hhg-book-page-content .hhg-upload-zone-brutalist:hover {
+  background: rgba(0,0,0,0.02) !important;
+  border-color: #be185d !important;
+}
+
+/* Fix upload icon */
+.hhg-book-page-content .hhg-upload-arrow-icon {
+  background: #cbd5e1 !important;
+  box-shadow: none !important;
+  color: #0f172a !important;
+}
+
+/* Fix buttons inside the book */
+.hhg-book-page-content .btn-brutalist {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border: 2px solid #0f172a !important;
+  box-shadow: 2px 2px 0px #0f172a !important;
+}
+.hhg-book-page-content .btn-brutalist:hover {
+  background: #e2e8f0 !important;
+  transform: translate(1px, 1px) !important;
+  box-shadow: 1px 1px 0px #0f172a !important;
+}
+
+/* Override text colors to be dark ink */
+.hhg-book-page-content h2,
+.hhg-book-page-content h3,
+.hhg-book-page-content p,
+.hhg-book-page-content .hhg-step-subtitle,
+.hhg-book-page-content .format-title,
+.hhg-book-page-content .format-desc,
+.hhg-book-page-content .format-tag-pill {
+  color: #0f172a !important;
+  text-shadow: none !important;
+}
+
+/* Step 3 Overrides: Format Cards */
+.hhg-book-page-content .format-card {
+  background: transparent !important;
+  border: 2px dashed #0f172a !important;
+  box-shadow: none !important;
+}
+.hhg-book-page-content .format-card.sel {
+  border: 2px solid #0f172a !important;
+  background: rgba(15, 23, 42, 0.05) !important;
+}
+.hhg-book-page-content .format-check {
+  background: #0f172a !important;
+  color: #f8fafc !important;
+}
+.hhg-book-page-content .format-icon {
+  background: transparent !important;
+  border: 2px solid transparent !important;
+}
+.hhg-book-page-content .format-card.sel .format-icon {
+  border: 2px solid #0f172a !important;
+}
+
+/* Step 4 Overrides: Style Cards and Fields */
+.hhg-book-page-content .frame-opt {
+  border: 2px solid rgba(15, 23, 42, 0.2) !important;
+  background: transparent !important;
+}
+.hhg-book-page-content .frame-opt:hover {
+  border-color: rgba(15, 23, 42, 0.5) !important;
+}
+.hhg-book-page-content .frame-opt.sel {
+  border-color: #0f172a !important;
+  background: rgba(15, 23, 42, 0.05) !important;
+  box-shadow: none !important;
+}
+.hhg-book-page-content .frame-thumb {
+  background: transparent !important;
+  border: 2px solid transparent !important;
+}
+.hhg-book-page-content .frame-opt.sel .frame-thumb {
+  border: 2px solid #0f172a !important;
+}
+.hhg-book-page-content .frame-name {
+  color: #0f172a !important;
+}
+.hhg-book-page-content .glass-card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+.hhg-book-page-content .field-lbl {
+  color: #0f172a !important;
+}
+.hhg-book-page-content .field-in {
+  background: rgba(15, 23, 42, 0.05) !important;
+  border: 2px solid rgba(15, 23, 42, 0.2) !important;
+  color: #0f172a !important;
+}
+.hhg-book-page-content .field-in:focus {
+  border-color: #0f172a !important;
+}
+
+/* Headers shouldn't have dark backgrounds inside the book */
+.hhg-book-page-content .hhg-step-card-header,
+.hhg-book-page-content .hhg-step-card-header-brutalist {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 0 20px 0 !important;
+}
+
+.hhg-book-page-content .hhg-step-counter,
+.hhg-book-page-content .hhg-step-badge {
+  color: #0f172a !important; /* Changed from pink to dark ink */
+  background: transparent !important;
+  border: 2px solid #0f172a !important;
+}
+
+/* Step 2 Overrides: Ink on Paper style */
+.hhg-book-page-content .crop-label span {
+  color: #0f172a !important;
+  font-weight: 700;
+}
+
+.hhg-book-page-content .shape-btn {
+  background: transparent !important;
+  border: 2px solid #94a3b8 !important;
+  color: #0f172a !important;
+}
+.hhg-book-page-content .shape-btn.on {
+  border-color: #0f172a !important;
+  background: rgba(15, 23, 42, 0.05) !important;
+}
+
+.hhg-book-page-content .slider {
+  accent-color: #0f172a !important; /* For modern browsers that support accent-color */
+}
+.hhg-book-page-content .slider::-webkit-slider-thumb {
+  background: #0f172a !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+.hhg-book-page-content .slider::-webkit-slider-runnable-track {
+  background: #cbd5e1 !important;
+}
+
+.hhg-book-page-content .btn-yellow {
+  background: #0f172a !important;
+  color: #f8fafc !important; /* White text on dark button */
+  border: 2px solid #0f172a !important;
+  box-shadow: none !important;
+}
+.hhg-book-page-content .btn-yellow:hover {
+  background: #1e293b !important;
+}
+
+/* Step 4 Overrides: Frame Styles and Form */
+.hhg-book-page-content .frame-name {
+  color: #0f172a !important;
+}
+.hhg-book-page-content .frame-opt.sel {
+  border: 2px solid #0f172a !important;
+  background: rgba(15, 23, 42, 0.05) !important;
+}
+
+/* Strip glass card styling inside book */
+.hhg-book-page-content .glass-card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+/* Builder Details Header (override inline style) */
+.hhg-book-page-content .glass-card > div:first-child {
+  color: #0f172a !important;
+  border-bottom-color: #cbd5e1 !important;
+}
+
+/* Form Fields */
+.hhg-book-page-content .field-lbl {
+  color: #0f172a !important;
+}
+.hhg-book-page-content .field-in,
+.hhg-book-page-content .field-sel {
+  background: transparent !important;
+  border: 2px solid #94a3b8 !important;
+  color: #0f172a !important;
+}
+.hhg-book-page-content .field-in:focus,
+.hhg-book-page-content .field-sel:focus {
+  border-color: #0f172a !important;
+  box-shadow: 2px 2px 0 #0f172a !important;
+  outline: none;
+}
+.hhg-book-page-content .field-in::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Title Preview Box */
+.hhg-book-page-content .title-preview {
+  background: transparent !important;
+  border: 2px dashed #0f172a !important;
+  box-shadow: none !important;
+}
+.hhg-book-page-content .title-preview-lbl,
+.hhg-book-page-content .title-preview-val {
+  color: #0f172a !important;
+}
+
+/* Step 5 Overrides: Results Page */
+.hhg-book-page-content span[style*="color: '#FF1B8D'"],
+.hhg-book-page-content span[style*="color: #FF1B8D"],
+.hhg-book-page-content span[style*="color:#FF1B8D"] {
+  color: #0f172a !important;
+  font-weight: bold;
+}
+.hhg-book-page-content .actions-title,
+.hhg-book-page-content .preview-lbl {
+  color: #0f172a !important;
+}
+
+.hhg-book-page-content .hhg-panel,
+.hhg-book-page-content .gen-layout,
+.hhg-book-page-content .actions-wrap,
+.hhg-book-page-content .lanyard-preview {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Action Buttons */
+.hhg-book-page-content .act-btn {
+  background: transparent !important;
+  border: 2px solid #0f172a !important;
+  box-shadow: none !important;
+  color: #0f172a !important;
+}
+.hhg-book-page-content .act-btn:hover {
+  border-color: #0f172a !important;
+  background: rgba(15,23,42,0.05) !important;
+}
+.hhg-book-page-content .act-main,
+.hhg-book-page-content .act-sub,
+.hhg-book-page-content .act-btn .act-icon {
+  color: #0f172a !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Style Info Box */
+.hhg-book-page-content .actions-wrap > div[style*="background"] {
+  background: transparent !important;
+  border: 2px dashed #94a3b8 !important;
+}
+.hhg-book-page-content .actions-wrap > div[style*="background"] div {
+  color: #0f172a !important;
+}
+
+/* Global Navigation Arrows */
+.hhg-global-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.8);
+  border: 2px solid #E8C840;
+  color: #E8C840;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+/* Step 5 Previews */
+.hhg-book-page-content .mobile-2d-preview {
+  display: block !important;
+}
+
+@media (max-width: 960px) {
+  .hhg-book-page-content .mobile-2d-preview {
+    margin-bottom: 20px;
+  }
+}
+
+.hhg-global-nav:hover {
+  background: #E8C840;
+  color: #0F172A;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 4px 20px rgba(232, 200, 64, 0.4);
+}
+
+.hhg-global-nav.prev-arrow {
+  left: calc(-100% - 80px);
+}
+
+.hhg-global-nav.next-arrow {
+  right: -80px;
+}
