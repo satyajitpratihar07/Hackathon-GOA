@@ -167,6 +167,8 @@ export default function App() {
   const [introDone, setIntroDone] = useState(false);
   const [isHouseOpen, setIsHouseOpen] = useState(false);
   const [isErrorTerminalOpen, setIsErrorTerminalOpen] = useState(false);
+  const [bookVisible, setBookVisible] = useState(false);
+  const bookRef = useRef(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -371,7 +373,12 @@ export default function App() {
           <div className="hhg-scroll-btn-wrap">
             <button
               className="hhg-scroll-btn"
-              onClick={() => document.querySelector('.hhg-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              onClick={() => {
+                setBookVisible(true);
+                setTimeout(() => {
+                  bookRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 80);
+              }}
               aria-label="Scroll down to get started"
             >
               <span className="hhg-scroll-btn-text">GET STARTED</span>
@@ -387,8 +394,17 @@ export default function App() {
           </div>
         </div>
 
-        {/* Interactive Book Flow */}
-        <main className="hhg-content" style={{ display: 'flex', justifyContent: 'center' }}>
+        {/* Interactive Book Flow — only rendered after GET STARTED is clicked */}
+        {bookVisible && (
+          <main
+            ref={bookRef}
+            className="hhg-content"
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              animation: 'bookReveal 0.6s ease forwards',
+            }}
+          >
           <InteractiveBook step={step} onOpen={() => setStep(1)} onClose={() => setStep(0)}>
             {/* Page 1: UPLOAD */}
             <Step1Upload
@@ -458,6 +474,7 @@ export default function App() {
             )}
           </InteractiveBook>
         </main>
+        )}
 
         <footer className="hhg-footer">
           <span>#FrameInGoa</span> · HH Goa 2026 · GOA, INDIA · 28–31 OCT 2026 · <span>2:47 PM STUDIO</span>

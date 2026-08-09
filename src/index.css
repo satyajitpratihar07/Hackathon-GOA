@@ -14,7 +14,15 @@ html {
   -webkit-overflow-scrolling: touch;
   /* Prevents bounce/overscroll effects that can cause jank */
   overscroll-behavior: none;
-  scroll-behavior: auto; /* Let JS control scroll, not CSS (avoids conflicts) */
+  scroll-behavior: auto;
+  /* Lock html to viewport — only .hhg-app scrolls */
+  height: 100%;
+  overflow: hidden;
+}
+
+@keyframes bookReveal {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -307,8 +315,9 @@ body {
   font-family: 'Space Grotesk', sans-serif;
   background: #0D3B1E;
   color: #fff;
-  min-height: 100dvh;
-  overflow-x: hidden;
+  /* Lock body to viewport height — background stays fixed */
+  height: 100%;
+  overflow: hidden;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -407,7 +416,13 @@ body {
 .hhg-app {
   position: relative;
   z-index: 1;
-  min-height: 100dvh;
+  /* This is now the ONLY scrolling container — background stays fixed */
+  height: 100vh;
+  height: 100dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: none;
   display: flex;
   flex-direction: column;
 }
