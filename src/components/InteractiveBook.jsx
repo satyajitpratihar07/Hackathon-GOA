@@ -206,7 +206,6 @@ export default function InteractiveBook({ step, children, onOpen, onClose }) {
           </button>
         )}
 
-        {/* Front Cover */}
         <div 
           className="hhg-book-page hhg-book-front-cover"
           style={{ 
@@ -215,8 +214,13 @@ export default function InteractiveBook({ step, children, onOpen, onClose }) {
             cursor: 'pointer'
           }}
           onClick={handleCoverClick}
+          onTouchEnd={handleCoverClick}
         >
-          <div className="hhg-book-page-front cover-front">
+          <div 
+            className="hhg-book-page-front cover-front"
+            onClick={handleCoverClick}
+            onTouchEnd={handleCoverClick}
+          >
             <div className="cover-click-hint">
               <span className="pulse-icon">👆</span> CLICK TO OPEN
             </div>
