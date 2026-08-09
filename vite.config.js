@@ -9,9 +9,11 @@ export default defineConfig({
     // Use Rollup's code splitting for smaller initial bundle
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Split vendor libs into separate chunk (better caching)
-          'vendor-react': ['react', 'react-dom'],
+        // manualChunks must be a function in Vite 8 (rolldown)
+        manualChunks(id) {
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+            return 'vendor-react';
+          }
         },
       },
     },
